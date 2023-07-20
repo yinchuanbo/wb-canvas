@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media</title>
+    <link rel="stylesheet" href="./styles/media.css" />
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="myCanvas"></canvas>
+      <div class="docker">
+        <button type="button" id="media">
+          <label>
+            <svg
+              t="1689829213101"
+              class="icon"
+              viewBox="0 0 1024 1024"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              p-id="2357"
+              width="25"
+              height="25"
+            >
+              <path
+                d="M304.28 509.818c30.015 0 59.805-30.443 59.805-59.783s-29.79-59.805-59.805-59.805c-30.015 0-59.805 30.443-59.805 59.805s29.768 59.782 59.805 59.782zM782.608 270.643h-657.72c-30.015 0-59.805 30.465-59.805 59.805v478.35c0 29.34 29.768 59.76 59.805 59.76h657.72c30.015 0 59.783-30.442 59.783-59.76v-478.35c0.022-29.34-29.767-59.805-59.783-59.805zM782.608 808.798h-657.72v-179.393c43.74 22.050 102.983 59.782 179.37 59.782 58.86 0 123.097-29.205 179.392-59.782 58.073-31.567 104.513-59.805 149.49-59.805 55.62 0 113.085 36.203 149.49 59.805v179.393zM782.608 569.623c-36.675-23.558-102.87-59.783-149.49-59.783-44.797 0-83.273 33.547-149.49 59.783-58.568 23.22-117.315 59.805-175.185 59.805-77.333 0-139.41-37.665-183.578-59.805v-239.175h657.72v239.175zM334.183 151.055v59.805h568.035v508.23h59.783v-568.035h-627.817z"
+                p-id="2358"
+                fill="currentColor"
+              ></path>
+            </svg>
+            <input type="file" id="upload" />
+          </label>
+        </button>
+        <button type="button" id="pencil">
+          <svg
+            t="1689829459963"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="7439"
+            width="22"
+            height="22"
+          >
+            <path
+              d="M945.1 324.9c0-11.1-4.3-21.5-12.1-29.3l-204-204c-7.8-7.8-18.2-12.1-29.3-12.1-11.1 0-21.5 4.3-29.3 12.1L87.7 674.3c-8.8 8.8-13.2 21.1-11.9 33.5l19 185c2 19.4 17.5 34.9 36.9 36.9l185 19c1.4 0.1 2.9 0.2 4.3 0.2 10.9 0 21.4-4.3 29.2-12.1l489.7-489.7 93-93c7.9-7.8 12.2-18.2 12.2-29.2zM309.6 875.6l-145.8-15-15-145.8 454-453.8 160.7 160.7-453.9 453.9z m504.9-504.8L653.7 210.1l45.9-45.9 160.7 160.7-45.8 45.9z"
+              fill="currentColor"
+              p-id="7440"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <div id="curScale"></div>
+      <div id="toolbar">
+        <button type="button" id="crop">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <g transform="translate(-1534 -406)">
+              <g transform="translate(1536.933 409)">
+                <path
+                  d="M1076.256,299.444v12.908a1.245,1.245,0,0,0,1.246,1.246h6.8"
+                  transform="translate(-1072.753 -299.444)"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                ></path>
+                <path
+                  d="M1086.718,316.448V303.54a1.246,1.246,0,0,0-1.246-1.246h-6.8"
+                  transform="translate(-1072.159 -298.743)"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                ></path>
+                <line
+                  x2="3.502"
+                  transform="translate(0 3.551)"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                ></line>
+                <line
+                  x2="3.502"
+                  transform="translate(14.631 14.309)"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                ></line>
+              </g>
+            </g>
+          </svg>
+          <!-- 下拉 -->
+          <div class="cropType__list">
+            <ul>
+              <li id="original">Original</li>
+              <li id="custom">Custom</li>
+              <li id="rect1-1">rect <span>1:1</span></li>
+              <li id="circle1-1">circle <span>1:1</span></li>
+              <li id="rect4-3">rect <span>4:3</span></li>
+              <li id="rect3-4">rect <span>3:4</span></li>
+              <li id="wide">Wide</li>
+            </ul>
+          </div>
+        </button>
+        <button type="button" id="scale">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <g clip-path="url(#clip-path)">
+              <path
+                d="M5.667,491H16.333M5.667,491l1.778-2.667M5.667,491l1.778,2.667M16.333,491l-1.778-2.667M16.333,491l-1.778,2.667M19,499V483M3,499V483"
+                transform="translate(1.5 -478.5)"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.7"
+              ></path>
+            </g>
+          </svg>
+        </button>
+        <button type="button" id="rotate">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <g transform="translate(-40 -495)">
+              <g transform="translate(44.302 499.668)">
+                <path
+                  d="M1068.266,372.156a6.981,6.981,0,0,1-3.62,1.008,7.335,7.335,0,1,1,7.146-7.332"
+                  transform="translate(-1057.5 -358.5)"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                ></path>
+                <path
+                  d="M1073.678,369.888l2.974-4.014a.548.548,0,0,0-.44-.873h-5.948a.548.548,0,0,0-.44.873l2.974,4.014A.547.547,0,0,0,1073.678,369.888Z"
+                  transform="translate(-1059.362 -359.401)"
+                  fill="currentColor"
+                ></path>
+              </g>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <div id="topbar">
+        <button type="button" id="exportImage">
+          <svg
+            t="1689823239581"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="3478"
+            width="20"
+            height="20"
+          >
+            <path
+              fill="currentColor"
+              d="M512 128l184 192H544v448h-64V320H328l184-192z m384 384h-64v320H192V512h-64v384h768V512z"
+              p-id="3479"
+            ></path>
+          </svg>
+        </button>
+        <!-- 取色笔 -->
+        <button type="button" id="color">
+          <svg
+            t="1689823047568"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="2430"
+            width="20"
+            height="20"
+          >
+            <path
+              d="M146.176 776.64l-5.333333 102.378667 94.784-10.816 398.357333-398.336-90.517333-90.517334L146.176 776.64z m321.856-472.704l226.282667 226.282667-419.413334 419.413333-224.533333 25.578667 12.288-235.733334 420.48-420.458666-75.434667-75.413334 60.330667-60.352 45.269333 45.248 135.786667-135.786666c74.922667-74.922667 196.608-74.88 271.509333 0.021333 74.965333 74.986667 74.965333 196.565333 0.021334 271.509333l-135.786667 135.786667 45.226667 45.269333-60.330667 60.330667L468.053333 303.936z m392.256-0.042667a106.666667 106.666667 0 0 0-150.848-150.826666l-135.808 135.786666 150.848 150.826667 135.808-135.786667z"
+              fill="currentColor"
+              p-id="2431"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <script src="./scripts/libs/fabric.min.js"></script>
+    <script src="./scripts/common.js"></script>
+    <script src="./scripts/conf.js"></script>
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/events.js"></script>
+    <script src="./scripts/canvas.js"></script>
+    <script src="./scripts/media.js"></script>
+  </body>
+</html>
