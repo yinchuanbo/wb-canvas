@@ -24,7 +24,6 @@ class ImgMedia {
 	constructor(imgObj) {
 		this.imgObj = imgObj;
 		this.cropBox = null;
-		this.originalImage = null;
 		this.comScale = 1;
 		this.init();
 	}
@@ -35,8 +34,6 @@ class ImgMedia {
 	createImageCom() {
 		this.fabricImg = new fabric.Image(this.imgObj);
 		this.fabricImg.set({
-			left: canvas.width / 2,
-			top: canvas.height / 2,
 			width: this.imgObj.width,
 			height: this.imgObj.height,
 			borderColor: "#1967d2",
@@ -54,22 +51,22 @@ class ImgMedia {
 			showToolBar();
 		});
 		this.fabricImg.on("moving", function (e) {
-			if (_this.cropBox && _this.originalImage) {
+			if (_this.cropBox) {
 				canvas.setActiveObject(_this.cropBox);
 				var rectBounds = _this.cropBox.getBoundingRect();
-				var imageBounds = _this.originalImage.getBoundingRect();
+				var imageBounds = _this.fabricImg.getBoundingRect();
 				canvas.setActiveObject(_this.cropBox);
 				if (rectBounds.left < imageBounds.left) {
-					_this.originalImage.set("left", rectBounds.left);
+					_this.fabricImg.set("left", rectBounds.left);
 				}
 				if (rectBounds.top < imageBounds.top) {
-					_this.originalImage.set("top", rectBounds.top);
+					_this.fabricImg.set("top", rectBounds.top);
 				}
 				if (
 					rectBounds.left + rectBounds.width >
 					imageBounds.left + imageBounds.width
 				) {
-					_this.originalImage.set(
+					_this.fabricImg.set(
 						"left",
 						rectBounds.left + rectBounds.width - imageBounds.width
 					);
@@ -78,7 +75,7 @@ class ImgMedia {
 					rectBounds.top + rectBounds.height >
 					imageBounds.top + imageBounds.height
 				) {
-					_this.originalImage.set(
+					_this.fabricImg.set(
 						"top",
 						rectBounds.top + rectBounds.height - imageBounds.height
 					);
@@ -94,8 +91,8 @@ class ImgMedia {
 		// 原生事件
 		// 旋转
 		$id("rotate").onclick = () => {
-			if (this.originalImage) {
-				this.originalImage.rotate(this.originalImage.angle + 90);
+			if (this.fabricImg) {
+				this.fabricImg.rotate(this.fabricImg.angle + 90);
 			} else {
 				const activeObject = canvas.getActiveObject();
 				activeObject?.rotate?.(activeObject.angle + 90);
@@ -104,7 +101,7 @@ class ImgMedia {
 		};
 		// 缩放
 		$id("scale").onclick = () => {
-			const curActiveObject = this.originalImage || canvas.getActiveObject();
+			const curActiveObject = this.fabricImg || canvas.getActiveObject();
 			if (curActiveObject) {
 				const centerPoint = curActiveObject.getCenterPoint();
 				this.comScale += 0.05;
@@ -124,23 +121,15 @@ class ImgMedia {
 			if (cropTypeList) {
 				cropTypeList.classList.toggle('active');
 			}
-			var activeObject = canvas.getActiveObject();
-			if (activeObject && activeObject?.type === "image") {
-				this.originalImage = activeObject;
-				this.originalImage.selectable = true;
-			}
 		};
 		$id('original').onclick = (e) => {
 			e.stopPropagation()
 			document.querySelector('.cropType__list').classList.remove('active');
-			if (this.initOriginalImage) {
-
-			}
 		}
 		$id('rect1-1').onclick = (e) => {
 			e.stopPropagation()
 			document.querySelector('.cropType__list').classList.remove('active');
-			let { width, height, left, top, scaleX, scaleY } = _this.originalImage;
+			let { width, height, left, top, scaleX, scaleY } = _this.fabricImg;
 			width = width * scaleX;
 			height = height * scaleY;
 			const minSize = Math.min(width, height);
@@ -160,7 +149,7 @@ class ImgMedia {
 		height
 	}) {
 		let _this = this;
-		if (this.originalImage) {
+		if (this.fabricImg) {
 			this.cropBox = new fabric.Rect({
 				left,
 				top,
@@ -194,62 +183,11 @@ class ImgMedia {
 		}
 	}
 	cropImage() {
-		let _this = this;
 		if (this.cropBox) {
-			var left = this.cropBox.left - this.originalImage.left;
-			var top = this.cropBox.top - this.originalImage.top;
+			var left = this.cropBox.left - this.fabricImg.left;
+			var top = this.cropBox.top - this.fabricImg.top;
 			var width = this.cropBox.width * this.cropBox.scaleX;
 			var height = this.cropBox.height * this.cropBox.scaleY;
-			// 原始图片信息
-			if (!_this.initOriginalImage) {
-				const originImg = this.originalImage.toDataURL({
-					format: "png",
-					quality: 1
-				});
-				_this.initOriginalImage = {
-					left: _this.originalImage.left,
-					top: _this.originalImage.top,
-					width: _this.originalImage.width,
-					height: _this.originalImage.height,
-					src: originImg
-				}
-			}
-			// 上一次 cropBox 信息
-			_this.preCropBox = {
-				left: _this.cropBox.left,
-				top: _this.cropBox.top,
-				width: _this.cropBox.width,
-				height: _this.cropBox.height,
-			}
-			var croppedImage = new Image();
-			croppedImage.src = this.originalImage.toDataURL({
-				left: left,
-				top: top,
-				width: width,
-				height: height,
-				format: "png",
-			});
-			croppedImage.onload = function () {
-				var imgInstance = new fabric.Image(croppedImage, {
-					left: _this.originalImage.left + left,
-					top: _this.originalImage.top + top,
-					angle: 0,
-					opacity: 1,
-					cornerSize: 10,
-					hasRotatingPoint: false,
-					borderColor: "#1967d2",
-					cornerColor: "#1967d2",
-				});
-				imgInstance.on('scaling', () => {
-					showToolBar()
-				})
-				canvas.remove(_this.originalImage);
-				canvas.remove(_this.cropBox);
-				canvas.add(imgInstance);
-				_this.originalImage = imgInstance;
-				_this.cropBox = null;
-				canvas.renderAll();
-			};
 		}
 	}
 }
