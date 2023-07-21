@@ -32,6 +32,7 @@ class ImgMedia {
 		this.setImageComEvents();
 	}
 	createImageCom() {
+		let _this = this;
 		this.fabricImg = new fabric.Image(this.imgObj);
 		this.fabricImg.set({
 			width: this.imgObj.width,
@@ -43,7 +44,45 @@ class ImgMedia {
 		});
 		canvas.add(this.fabricImg);
 		canvas.centerObject(this.fabricImg);
+		this.originalImage = {
+			width: this.fabricImg.width,
+			height: this.fabricImg.height,
+			left: this.fabricImg.left,
+			top: this.fabricImg.top,
+			src: this.fabricImg.getElement().src
+		};
 		canvas.renderAll();
+	}
+	backToOrigin(type = "back") {
+		if (this.originalImage) {
+			canvas.remove(this.fabricImg);
+			this.fabricImg = null;
+			if (type === 'back') {
+				canvas.remove(this.cropBox);
+				this.cropBox = null;
+			}
+			const newImg = new Image();
+			newImg.src = this.originalImage.src;
+			newImg.onload = () => {
+				this.fabricImg = new fabric.Image(newImg);
+				this.fabricImg.set({
+					width: this.originalImage.width,
+					height: this.originalImage.height,
+					left: this.originalImage.left,
+					top: this.originalImage.top,
+					borderColor: "#1967d2",
+					cornerColor: "#1967d2",
+					cornerSize: 10,
+					type: 'image'
+				});
+				canvas.add(this.fabricImg);
+				if (type === 'change') {
+					this.startCrop(this.preCropBox)
+				}
+				this.setImageComEvents()
+				canvas.renderAll();
+			}
+		}
 	}
 	setImageComEvents() {
 		let _this = this;
@@ -51,6 +90,11 @@ class ImgMedia {
 			showToolBar();
 		});
 		this.fabricImg.on("moving", function (e) {
+			_this.originalImage = {
+				..._this.originalImage,
+				left: _this.fabricImg.left,
+				top: _this.fabricImg.top,
+			}
 			if (_this.cropBox) {
 				canvas.setActiveObject(_this.cropBox);
 				var rectBounds = _this.cropBox.getBoundingRect();
@@ -89,6 +133,15 @@ class ImgMedia {
 			}
 		});
 		// 原生事件
+		$id('changeToolbar').onclick = () => {
+			if (_this?.isCrop) {
+				_this.backToOrigin('change');
+			} else {
+				handleCrop();
+				showToolBar();
+			}
+
+		}
 		// 旋转
 		$id("rotate").onclick = () => {
 			if (this.fabricImg) {
@@ -115,20 +168,7 @@ class ImgMedia {
 				canvas.renderAll();
 			}
 		};
-		// 裁剪
-		$id("crop").onclick = () => {
-			const cropTypeList = $id("crop").querySelector('.cropType__list');
-			if (cropTypeList) {
-				cropTypeList.classList.toggle('active');
-			}
-		};
-		$id('original').onclick = (e) => {
-			e.stopPropagation()
-			document.querySelector('.cropType__list').classList.remove('active');
-		}
-		$id('rect1-1').onclick = (e) => {
-			e.stopPropagation()
-			document.querySelector('.cropType__list').classList.remove('active');
+		function handleCrop() {
 			let { width, height, left, top, scaleX, scaleY } = _this.fabricImg;
 			width = width * scaleX;
 			height = height * scaleY;
@@ -141,53 +181,396 @@ class ImgMedia {
 				height: curSize
 			})
 		}
+		// 裁剪
+		$id("crop").onclick = () => {
+			const cropTypeList = $id("crop").querySelector('.cropType__list');
+			if (cropTypeList) {
+				cropTypeList.classList.toggle('active');
+			}
+		};
+		$id('original').onclick = (e) => {
+			e.stopPropagation()
+			_this.isCrop = false
+			document.querySelector('.cropType__list').classList.remove('active');
+			$id("toolbar").style.display = "none";
+			$id("toolbar").classList.remove('active');
+			_this.backToOrigin()
+		}
+		$id('rect1-1').onclick = (e) => {
+			e.stopPropagation()
+			document.querySelector('.cropType__list').classList.remove('active');
+			let preCropBox = {
+				left: _this.cropBox.left,
+				top: _this.cropBox.top,
+				width: _this.cropBox.width,
+				height: _this.cropBox.height,
+			}
+			canvas.remove(_this.cropBox)
+			_this.cropBox = null;
+			// 1:1
+			let left, top, width, height;
+			if (preCropBox.width > preCropBox.height) {
+				height = preCropBox.height;
+				width = preCropBox.height * 1 / 1;
+				left = preCropBox.left + preCropBox.width / 2 - width / 2;
+				top = preCropBox.top;
+			} else {
+				width = preCropBox.width;
+				height = preCropBox.width * 1 / 1;
+				left = preCropBox.left;
+				top = preCropBox.top + preCropBox.height / 2 - height / 2;
+			}
+			_this.startCrop({
+				left,
+				top,
+				width,
+				height
+			})
+			preCropBox = null;
+		}
+		$id('circle1-1').onclick = (e) => {
+			e.stopPropagation()
+			document.querySelector('.cropType__list').classList.remove('active');
+			let preCropBox = {
+				left: _this.cropBox.left,
+				top: _this.cropBox.top,
+				width: _this.cropBox.width,
+				height: _this.cropBox.height,
+			}
+			canvas.remove(_this.cropBox)
+			_this.cropBox = null;
+			const minsize = Math.min(preCropBox.width, preCropBox.height);
+			_this.startCrop({
+				left: preCropBox.left + preCropBox.width / 2 - minsize / 2,
+				top: preCropBox.top + preCropBox.height / 2 - minsize / 2,
+				radius: minsize / 2,
+				type: 'circle',
+			})
+			preCropBox = null;
+		}
+		$id('rect4-3').onclick = (e) => {
+			e.stopPropagation()
+			document.querySelector('.cropType__list').classList.remove('active');
+			let preCropBox = {
+				left: _this.cropBox.left,
+				top: _this.cropBox.top,
+				width: _this.cropBox.width,
+				height: _this.cropBox.height,
+			}
+			canvas.remove(_this.cropBox)
+			_this.cropBox = null;
+			// 4:3
+			let left, top, width, height;
+			if (preCropBox.width > preCropBox.height) {
+				height = preCropBox.height;
+				width = preCropBox.height * 4 / 3;
+				left = preCropBox.left + preCropBox.width / 2 - width / 2;
+				top = preCropBox.top;
+			} else {
+				width = preCropBox.width;
+				height = preCropBox.width * 3 / 4;
+				left = preCropBox.left;
+				top = preCropBox.top + preCropBox.height / 2 - height / 2;
+			}
+			_this.startCrop({
+				left,
+				top,
+				width,
+				height
+			})
+			preCropBox = null;
+		}
+		$id('rect3-4').onclick = (e) => {
+			e.stopPropagation()
+			document.querySelector('.cropType__list').classList.remove('active');
+			let preCropBox = {
+				left: _this.cropBox.left,
+				top: _this.cropBox.top,
+				width: _this.cropBox.width,
+				height: _this.cropBox.height,
+			}
+			canvas.remove(_this.cropBox)
+			_this.cropBox = null;
+			// 3:4
+			let left, top, width, height;
+			if (preCropBox.width > preCropBox.height) {
+				height = preCropBox.height;
+				width = preCropBox.height * 3 / 4;
+				left = preCropBox.left + preCropBox.width / 2 - width / 2;
+				top = preCropBox.top;
+			} else {
+				width = preCropBox.width;
+				height = preCropBox.width * 4 / 3;
+				left = preCropBox.left;
+				top = preCropBox.top + preCropBox.height / 2 - height / 2;
+			}
+			_this.startCrop({
+				left,
+				top,
+				width,
+				height
+			})
+			preCropBox = null;
+		}
+		$id('wide').onclick = (e) => {
+			e.stopPropagation()
+			document.querySelector('.cropType__list').classList.remove('active');
+			let preCropBox = {
+				left: _this.cropBox.left,
+				top: _this.cropBox.top,
+				width: _this.cropBox.width,
+				height: _this.cropBox.height,
+			}
+			canvas.remove(_this.cropBox)
+			_this.cropBox = null;
+			// 16:9
+			let left, top, width, height;
+			if (preCropBox.width > preCropBox.height) {
+				height = preCropBox.height;
+				width = preCropBox.height * 16 / 9;
+				left = preCropBox.left + preCropBox.width / 2 - width / 2;
+				top = preCropBox.top;
+			} else {
+				width = preCropBox.width;
+				height = preCropBox.width * 9 / 16;
+				left = preCropBox.left;
+				top = preCropBox.top + preCropBox.height / 2 - height / 2;
+			}
+			_this.startCrop({
+				left,
+				top,
+				width,
+				height
+			})
+			preCropBox = null;
+		}
+		$id('custom').onclick = (e) => {
+			e.stopPropagation()
+			document.querySelector('.cropType__list').classList.remove('active');
+			let preCropBox = {
+				left: _this.cropBox.left,
+				top: _this.cropBox.top,
+				width: _this.cropBox.width,
+				height: _this.cropBox.height,
+			}
+			canvas.remove(_this.cropBox)
+			_this.cropBox = null;
+			// _this.fabricImg.width:_this.fabricImg.height
+			let left, top, width, height;
+			if (preCropBox.width > preCropBox.height) {
+				height = preCropBox.height;
+				width = preCropBox.height * _this.fabricImg.width / _this.fabricImg.height;
+				left = preCropBox.left + preCropBox.width / 2 - width / 2;
+				top = preCropBox.top;
+			} else {
+				width = preCropBox.width;
+				height = preCropBox.width * _this.fabricImg.height / _this.fabricImg.width;
+				left = preCropBox.left;
+				top = preCropBox.top + preCropBox.height / 2 - height / 2;
+			}
+			_this.startCrop({
+				left,
+				top,
+				width,
+				height
+			})
+			preCropBox = null;
+		}
 	}
 	startCrop({
 		left,
 		top,
 		width,
-		height
+		height,
+		type = 'rect',
+		radius = 0,
 	}) {
 		let _this = this;
 		if (this.fabricImg) {
-			this.cropBox = new fabric.Rect({
-				left,
-				top,
-				width,
-				height,
-				fill: "rgba(0, 0, 0, 0.1)",
-				borderColor: "#1967d2",
-				cornerColor: "#1967d2",
-				cornerSize: 8,
-				transparentCorners: false,
-				lockRotation: true,
-				lockScalingFlip: true,
-				evented: false,
-				hasControls: true,
-			});
-			this.cropBox.on('scaling', () => {
-				console.log('this.cropBox', this.cropBox)
-			})
+			if (this.cropBox) {
+				canvas.remove(_this.cropBox);
+				_this.cropBox = null;
+			}
+			if (type === 'circle') {
+				this.cropBox = new fabric.Circle({
+					radius,
+					fill: "rgba(0, 0, 0, 0.1)",
+					left,
+					top,
+					borderColor: "#1967d2",
+					cornerColor: "#1967d2",
+					cornerSize: 8,
+					transparentCorners: false,
+					lockRotation: true,
+					lockScalingFlip: true,
+					evented: false,
+					hasControls: true,
+					type: 'cropBox'
+				});
+				this.cropBox.on('scaling', () => {
+					showToolBar('crop');
+					_this.preCropBox = {
+						left: _this.cropBox.left,
+						top: _this.cropBox.top,
+						width: _this.cropBox.width * _this.cropBox.scaleX,
+						height: _this.cropBox.height * _this.cropBox.scaleY,
+						radius: _this.cropBox.radius,
+						type: 'circle'
+					}
+					// 设置 corner 的移动范围
+				})
+			} else {
+				this.cropBox = new fabric.Rect({
+					left,
+					top,
+					width,
+					height,
+					fill: "rgba(0, 0, 0, 0.1)",
+					borderColor: "#1967d2",
+					cornerColor: "#1967d2",
+					cornerSize: 8,
+					transparentCorners: false,
+					lockRotation: true,
+					lockScalingFlip: true,
+					evented: false,
+					hasControls: true,
+					type: 'cropBox'
+				});
+				this.cropBox.on('scaling', (e) => {
+					// const corner = e.transform.corner;
+					// var rectBounds = _this.cropBox.getBoundingRect();
+					// var imageBounds = _this.fabricImg.getBoundingRect();
+					showToolBar('crop')
+					_this.preCropBox = {
+						left: _this.cropBox.left,
+						top: _this.cropBox.top,
+						width: _this.cropBox.width * _this.cropBox.scaleX,
+						height: _this.cropBox.height * _this.cropBox.scaleY,
+						radius: ''
+					}
+				})
+			}
+
 			canvas.add(this.cropBox);
 			canvas.setActiveObject(this.cropBox);
 			setControlsVisibility(this.cropBox);
 			canvas.on("selection:cleared", function (event) {
+				if (!event?.e || _this.lock) return;
+				_this.lock = true;
 				var pointer = canvas.getPointer(event.e);
 				var target = canvas.findTarget(event.e);
 				if (target && target.hasControls && target.containsPoint(pointer)) {
-					canvas.setActiveObject(_this.cropBox);
+					if (_this.cropBox) {
+						canvas.setActiveObject(_this.cropBox);
+					}
 				} else {
 					_this.cropImage();
 				}
+				setTimeout(() => {
+					_this.lock = null;
+				}, 2000)
 			});
 		}
 	}
 	cropImage() {
+		let _this = this;
 		if (this.cropBox) {
+			this.isCrop = true;
 			var left = this.cropBox.left - this.fabricImg.left;
 			var top = this.cropBox.top - this.fabricImg.top;
 			var width = this.cropBox.width * this.cropBox.scaleX;
 			var height = this.cropBox.height * this.cropBox.scaleY;
+			var croppedImage = new Image();
+			croppedImage.src = this.fabricImg.toDataURL({
+				left: left,
+				top: top,
+				width: width,
+				height: height,
+				format: "png",
+			});
+			croppedImage.onload = function () {
+				if (_this.cropBox?.radius) {
+					var circleCanvas = document.createElement("canvas");
+					var ctx = circleCanvas.getContext("2d");
+					var minSize = Math.min(width, height);
+					circleCanvas.width = minSize;
+					circleCanvas.height = minSize;
+					ctx.beginPath();
+					ctx.arc(minSize / 2, minSize / 2, minSize / 2, 0, 2 * Math.PI);
+					ctx.closePath();
+					ctx.clip();
+					ctx.drawImage(
+						croppedImage,
+						0,
+						0,
+						width,
+						height,
+						0,
+						0,
+						minSize,
+						minSize
+					);
+					var circularImage = new Image();
+					circularImage.src = circleCanvas.toDataURL();
+					circularImage.onload = () => {
+						var imgInstance = new fabric.Image(circularImage, {
+							left: _this.fabricImg.left + left,
+							top: _this.fabricImg.top + top,
+							angle: 0,
+							opacity: 1,
+							cornerSize: 10,
+							hasRotatingPoint: false,
+							borderColor: "#1967d2",
+							cornerColor: "#1967d2",
+						});
+						imgInstance.on('scaling', () => {
+							showToolBar()
+						})
+						_this.preCropBox = {
+							left: _this.cropBox.left,
+							top: _this.cropBox.top,
+							width: _this.cropBox.width,
+							height: _this.cropBox.height,
+							radius: _this.cropBox.radius,
+							type: 'circle'
+						}
+						canvas.remove(_this.fabricImg);
+						canvas.remove(_this.cropBox);
+						_this.cropBox = null;
+						canvas.add(imgInstance);
+						_this.fabricImg = imgInstance;
+						canvas.renderAll();
+					}
+					return;
+				}
+				var imgInstance = new fabric.Image(croppedImage, {
+					left: _this.fabricImg.left + left,
+					top: _this.fabricImg.top + top,
+					angle: 0,
+					opacity: 1,
+					cornerSize: 10,
+					hasRotatingPoint: false,
+					borderColor: "#1967d2",
+					cornerColor: "#1967d2",
+				});
+				imgInstance.on('scaling', () => {
+					showToolBar()
+				})
+				_this.preCropBox = {
+					left: _this.cropBox.left,
+					top: _this.cropBox.top,
+					width: _this.cropBox.width * _this.cropBox.scaleX,
+					height: _this.cropBox.height * _this.cropBox.scaleY,
+					type: 'rect',
+					radius: ''
+				}
+				canvas.remove(_this.fabricImg);
+				canvas.remove(_this.cropBox);
+				_this.cropBox = null;
+				canvas.add(imgInstance);
+				_this.fabricImg = imgInstance;
+				canvas.renderAll();
+			};
 		}
 	}
 }

@@ -52,7 +52,7 @@
       </div>
       <div id="curScale"></div>
       <div id="toolbar">
-        <button type="button" id="crop">
+        <button type="button" id="changeToolbar">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -97,67 +97,115 @@
               </g>
             </g>
           </svg>
-          <!-- 下拉 -->
-          <div class="cropType__list">
-            <ul>
-              <li id="original">Original</li>
-              <li id="custom">Custom</li>
-              <li id="rect1-1">rect <span>1:1</span></li>
-              <li id="circle1-1">circle <span>1:1</span></li>
-              <li id="rect4-3">rect <span>4:3</span></li>
-              <li id="rect3-4">rect <span>3:4</span></li>
-              <li id="wide">Wide</li>
-            </ul>
-          </div>
         </button>
-        <button type="button" id="scale">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <g clip-path="url(#clip-path)">
-              <path
-                d="M5.667,491H16.333M5.667,491l1.778-2.667M5.667,491l1.778,2.667M16.333,491l-1.778-2.667M16.333,491l-1.778,2.667M19,499V483M3,499V483"
-                transform="translate(1.5 -478.5)"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.7"
-              ></path>
-            </g>
-          </svg>
-        </button>
-        <button type="button" id="rotate">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <g transform="translate(-40 -495)">
-              <g transform="translate(44.302 499.668)">
+        <div class="crop__buttons">
+          <button type="button" id="crop">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g transform="translate(-1534 -406)">
+                <g transform="translate(1536.933 409)">
+                  <path
+                    d="M1076.256,299.444v12.908a1.245,1.245,0,0,0,1.246,1.246h6.8"
+                    transform="translate(-1072.753 -299.444)"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                  <path
+                    d="M1086.718,316.448V303.54a1.246,1.246,0,0,0-1.246-1.246h-6.8"
+                    transform="translate(-1072.159 -298.743)"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                  <line
+                    x2="3.502"
+                    transform="translate(0 3.551)"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></line>
+                  <line
+                    x2="3.502"
+                    transform="translate(14.631 14.309)"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></line>
+                </g>
+              </g>
+            </svg>
+            <!-- 下拉 -->
+            <div class="cropType__list">
+              <ul>
+                <li id="original">Original</li>
+                <li id="custom">Custom</li>
+                <li id="rect1-1">rect <span>1:1</span></li>
+                <li id="circle1-1">circle <span>1:1</span></li>
+                <li id="rect4-3">rect <span>4:3</span></li>
+                <li id="rect3-4">rect <span>3:4</span></li>
+                <li id="wide">Wide</li>
+              </ul>
+            </div>
+          </button>
+          <button type="button" id="scale">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g clip-path="url(#clip-path)">
                 <path
-                  d="M1068.266,372.156a6.981,6.981,0,0,1-3.62,1.008,7.335,7.335,0,1,1,7.146-7.332"
-                  transform="translate(-1057.5 -358.5)"
+                  d="M5.667,491H16.333M5.667,491l1.778-2.667M5.667,491l1.778,2.667M16.333,491l-1.778-2.667M16.333,491l-1.778,2.667M19,499V483M3,499V483"
+                  transform="translate(1.5 -478.5)"
                   fill="none"
                   stroke="currentColor"
                   stroke-linecap="round"
-                  stroke-width="2"
-                ></path>
-                <path
-                  d="M1073.678,369.888l2.974-4.014a.548.548,0,0,0-.44-.873h-5.948a.548.548,0,0,0-.44.873l2.974,4.014A.547.547,0,0,0,1073.678,369.888Z"
-                  transform="translate(-1059.362 -359.401)"
-                  fill="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="1.7"
                 ></path>
               </g>
-            </g>
-          </svg>
-        </button>
+            </svg>
+          </button>
+          <button type="button" id="rotate">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g transform="translate(-40 -495)">
+                <g transform="translate(44.302 499.668)">
+                  <path
+                    d="M1068.266,372.156a6.981,6.981,0,0,1-3.62,1.008,7.335,7.335,0,1,1,7.146-7.332"
+                    transform="translate(-1057.5 -358.5)"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                  <path
+                    d="M1073.678,369.888l2.974-4.014a.548.548,0,0,0-.44-.873h-5.948a.548.548,0,0,0-.44.873l2.974,4.014A.547.547,0,0,0,1073.678,369.888Z"
+                    transform="translate(-1059.362 -359.401)"
+                    fill="currentColor"
+                  ></path>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </div>
       </div>
       <div id="topbar">
         <button type="button" id="exportImage">

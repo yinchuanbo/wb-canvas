@@ -1,5 +1,9 @@
 // 监听组件移动
 canvas.on("object:moving", (e) => {
+  if (e?.transform?.action === 'remove') {
+    return;
+  }
+  if (!e?.target?.setCoords) return;
   e.target.setCoords();
   showToolBar();
 });
@@ -35,6 +39,7 @@ canvas.on("selection:cleared", function () {
 });
 // 取色笔
 canvas.on('mouse:down', function (event) {
+  document.querySelector('.cropType__list').classList.remove('active');
   if (event.button === 1 && isColorPickerMode) {
     var pointer = canvas.getPointer(event.e);
     var color = canvas.getContext('2d').getImageData(pointer.x, pointer.y, 1, 1).data;

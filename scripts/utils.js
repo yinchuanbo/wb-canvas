@@ -1,15 +1,30 @@
+function getHiddenElementWidth(element) {
+  element.style.display = "block"; // 显示元素
+  var width = element.clientWidth + 20; // 获取宽度
+  element.style.display = "none"; // 隐藏元素
+  return width;
+}
+
 // 重新设置 toolbar 位置
 function showToolBar() {
   $id("toolbar").style.display = "none";
+  $id("toolbar").classList.remove('active');
   var selectedObject = canvas.getActiveObject();
-  if (!selectedObject || selectedObject.type !== "image") return;
+  if (!selectedObject) return;
   let boundingRect = selectedObject.getBoundingRect();
+  let dis = null;
+  if (selectedObject.type === 'cropBox') {
+    $id("toolbar").classList.add('active');
+    dis = 138;
+  } else {
+    $id("toolbar").classList.remove('active');
+    dis = 56
+  }
   $id("toolbar").style.left =
-    boundingRect.left + (boundingRect.width / 2 - 150 / 2) + "px";
-  $id("toolbar").style.top = boundingRect.top - 70 + "px";
-  $id("toolbar").style.width = `150px`;
-  $id("toolbar").style.height = `50px`;
+    boundingRect.left + (boundingRect.width / 2 - dis / 2) + "px";
+  $id("toolbar").style.top = boundingRect.top - 65 + "px";
   $id("toolbar").style.display = "flex";
+  $id("toolbar").style.padding = "5px 10px";
   selectedObject.setControlVisible("ml", false);
   selectedObject.setControlVisible("mr", false);
   selectedObject.setControlVisible("mt", false);

@@ -15,7 +15,9 @@ const $id = (selector = null) => {
     return document.getElementById(selector);
 }
 
-// 实例化 fabric 实例 
+// 实例化 fabric 实例
 var canvas = new fabric.Canvas("myCanvas", {
     preserveObjectStacking: true
 });
+
+canvas.renderOnAddRemove = true;
