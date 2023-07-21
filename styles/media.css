@@ -73,13 +73,25 @@ button {
   cursor: pointer;
 }
 
-#toolbar .crop__buttons {
+#toolbar .crop__buttons, #toolbar #downMedia {
   display: none;
 }
 
 #toolbar.active .crop__buttons {
   display: flex;
   align-items: center;
+}
+
+#downMedia {
+  margin-left: 0!important;
+}
+
+#toolbar.videoActive #changeToolbar {
+  display: none;
+}
+
+#toolbar.videoActive #downMedia {
+  display: block;
 }
 
 #toolbar.active #changeToolbar {

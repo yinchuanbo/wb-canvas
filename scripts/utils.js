@@ -14,10 +14,16 @@ function showToolBar() {
   let boundingRect = selectedObject.getBoundingRect();
   let dis = null;
   if (selectedObject.type === 'cropBox') {
+    $id("toolbar").classList.remove('videoActive');
     $id("toolbar").classList.add('active');
     dis = 138;
+  } else if(selectedObject.type === 'video' || selectedObject.type === 'videoGroup') {
+    $id("toolbar").classList.remove('active');
+    $id("toolbar").classList.add('videoActive');
+    dis = 56
   } else {
     $id("toolbar").classList.remove('active');
+    $id("toolbar").classList.remove('videoActive');
     dis = 56
   }
   $id("toolbar").style.left =
