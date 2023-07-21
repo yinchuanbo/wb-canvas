@@ -76,6 +76,7 @@ class ImgMedia {
 					type: 'image',
 				});
 				canvas.add(this.fabricImg);
+				console.log(this.comScale)
 				if (this.comScale !== 1) {
 					this.fabricImg.scale(this.comScale, this.comScale);
 					const offsetX = (this.fabricImg.width * this.comScale) / 2;
@@ -491,20 +492,19 @@ class ImgMedia {
 		let _this = this;
 		if (this.cropBox) {
 			this.isCrop = true;
+			var imageBounds = this.fabricImg.getBoundingRect();
 			var left = this.cropBox.left - this.fabricImg.left;
 			var top = this.cropBox.top - this.fabricImg.top;
 			var width = this.cropBox.width * this.cropBox.scaleX;
 			var height = this.cropBox.height * this.cropBox.scaleY;
 			var croppedImage = new Image();
-			const angle = this.fabricImg.angle;
 			croppedImage.src = this.fabricImg.toDataURL({
-				left: top,
-				top: left,
+				left: this.cropBox.left - imageBounds.left,
+				top: this.cropBox.top - imageBounds.top,
 				width: width,
 				height: height,
 				format: "png",
 			});
-			console.log('croppedImage.src', croppedImage.src)
 			croppedImage.onload = function () {
 				if (_this.cropBox?.radius) {
 					var circleCanvas = document.createElement("canvas");
