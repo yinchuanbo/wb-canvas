@@ -1,4 +1,3 @@
-// 处理文件上传
 $id("upload").addEventListener("change", (e) => {
   const file = e.target.files[0];
   const reader = new FileReader();
@@ -405,7 +404,7 @@ class ImgMedia {
       if (type === "circle") {
         this.cropBox = new fabric.Circle({
           radius,
-          fill: "rgba(0, 0, 0, 0.1)",
+          fill: "rgba(0, 0, 0, 0.2)",
           left,
           top,
           borderColor: "#1967d2",
@@ -429,7 +428,6 @@ class ImgMedia {
             radius: _this.cropBox.radius,
             type: "circle",
           };
-          // 设置 corner 的移动范围
         });
       } else {
         this.cropBox = new fabric.Rect({
@@ -437,7 +435,7 @@ class ImgMedia {
           top,
           width,
           height,
-          fill: "rgba(0, 0, 0, 0.1)",
+          fill: "rgba(0, 0, 0, 0.2)",
           borderColor: "#1967d2",
           cornerColor: "#1967d2",
           cornerSize: 8,
@@ -460,6 +458,35 @@ class ImgMedia {
       canvas.add(this.cropBox);
       canvas.setActiveObject(this.cropBox);
       setControlsVisibility(this.cropBox);
+      this.cropBox.on(
+        "scaling",
+        function (event) {
+          showToolBar("cropBox");
+          var cropBoxCoords = this.cropBox.getBoundingRect();
+          var fabricImgCoords = this.fabricImg.getBoundingRect();
+          if (
+            cropBoxCoords.left < fabricImgCoords.left ||
+            cropBoxCoords.top < fabricImgCoords.top ||
+            cropBoxCoords.left + cropBoxCoords.width >
+              fabricImgCoords.left + fabricImgCoords.width ||
+            cropBoxCoords.top + cropBoxCoords.height >
+              fabricImgCoords.top + fabricImgCoords.height
+          ) {
+            this.cropBox.set({
+              scaleX: this.cropBox.lastScaleX,
+              scaleY: this.cropBox.lastScaleY,
+              left: this.cropBox.lastLeft,
+              top: this.cropBox.lastTop,
+            });
+            this.cropBox.setCoords();
+          } else {
+            this.cropBox.lastScaleX = this.cropBox.scaleX;
+            this.cropBox.lastScaleY = this.cropBox.scaleY;
+            this.cropBox.lastLeft = this.cropBox.left;
+            this.cropBox.lastTop = this.cropBox.top;
+          }
+        }.bind(this)
+      );
       canvas.on("selection:cleared", function (event) {
         if (!event?.e || _this.lock) return;
         _this.lock = true;
@@ -669,6 +696,20 @@ class VideoMedia {
       });
       this.background.on("scaling", () => {
         _this.showVideo();
+        showToolBar();
+        const curW = this.background.scaleX * this.background.width;
+        const curH = this.background.scaleY * this.background.height;
+        let curSize = Math.min(curW, curH) - 34;
+        curSize = curSize > 80 ? 80 : curSize;
+        qs(_this.videoEl, ".play__button").style.width = `${curSize}px`;
+        qs(_this.videoEl, ".play__button").style.height = `${curSize}px`;
+        if (curW <= 270) {
+          if (!_this.isPlay) return;
+          qs(_this.videoEl, ".video__controls").style.display = "none";
+        } else {
+          if (!_this.isPlay) return;
+          qs(_this.videoEl, ".video__controls").style.display = "flex";
+        }
       });
       qs(_this.videoEl, ".play__button").onclick = () => {
         qs(_this.videoEl, "video").play();
@@ -796,17 +837,7 @@ class AudioMedia {
         rx: 8,
         ry: 8,
         type: "audio",
-      });
-      this.background.setControlsVisibility({
-        tl: false,
-        tr: false,
-        br: false,
-        bl: false,
-        ml: false,
-        mt: false,
-        mr: false,
-        mb: false,
-        mtr: false,
+        hasControls: false,
       });
       canvas.add(this.background);
       canvas.centerObject(this.background);
@@ -835,7 +866,7 @@ class AudioMedia {
         qs(this.audioEl, ".audio__playBtn").classList.remove("active");
         qs(this.audioEl, ".audio__logo").classList.remove("active");
         qs(_this.audioEl, ".audio__process input").value = 0;
-        qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML = '00:00'
+        qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML = "00:00";
       });
       this.audio.addEventListener("timeupdate", () => {
         if (!_this.isPlay) return;
@@ -854,7 +885,7 @@ class AudioMedia {
           this.audio.play();
         };
       };
-      $id('downMedia').onclick = () => {
+      $id("downMedia").onclick = () => {
         var selectedObject = canvas.getActiveObject();
         if (selectedObject && selectedObject === this.background) {
           const link = document.createElement("a");
@@ -862,7 +893,7 @@ class AudioMedia {
           link.download = "audio.mp3"; // 设置下载的文件名
           link.click();
         }
-      }
+      };
       canvas.renderAll();
     };
   }

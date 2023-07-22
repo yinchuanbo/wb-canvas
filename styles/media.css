@@ -18,9 +18,9 @@ body {
 
 .docker {
   width: auto;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
   position: fixed;
-  bottom: 30px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 5px;
@@ -32,7 +32,7 @@ body {
 }
 
 #curScale {
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
   position: fixed;
   bottom: 30px;
   right: 50px;
@@ -116,7 +116,7 @@ button {
   position: absolute;
   display: none;
   background-color: #fff;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -132,7 +132,7 @@ button {
 }
 
 #topbar {
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
   position: fixed;
   top: 40px;
   left: 50px;
@@ -175,7 +175,7 @@ button {
   height: auto;
   background-color: #fff;
   border-radius: 5px;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
   display: none;
 }
 
@@ -188,15 +188,13 @@ button {
   height: auto;
   overflow: auto;
   padding: 5px;
-  padding-right: 8px;
   box-sizing: border-box;
 }
 
 .cropType__list ul li {
   text-align: left;
   font-size: 14px;
-  text-indent: 5px;
-  padding: 5px 0;
+  padding: 8px 5px;
   display: flex;
   align-items: center;
   justify-content: space-between;
