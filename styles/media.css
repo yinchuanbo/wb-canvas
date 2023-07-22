@@ -205,3 +205,12 @@ button {
   border-radius: 3px;
   color: #1967d2;
 }
+
+#videoPlayButton {
+  position: absolute;
+  cursor: pointer;
+  width: 80px;
+  height: 80px;
+  background-image: url('../images/icon_media_videos_play.svg');
+  background-size: cover;
+}

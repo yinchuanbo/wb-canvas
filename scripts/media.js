@@ -585,6 +585,7 @@ class VideoMedia {
   constructor(data) {
     this.videoEvent = data;
     this.init();
+    this.isPlay = false;
     this.setEvents();
   }
   init() {
@@ -594,13 +595,15 @@ class VideoMedia {
     var videoElement = document.createElement("video");
     videoElement.setAttribute("height", height);
     videoElement.setAttribute("width", width);
+    videoElement.setAttribute("preload", "auto");
     videoElement.style.display = "none";
-    videoElement.autoplay = true;
-    videoElement.loop = true;
-    videoElement.muted = true;
+    // videoElement.autoplay = true;
+    // videoElement.loop = true;
+    // videoElement.muted = true;
     var sourceElement = document.createElement("source");
     sourceElement.setAttribute("src", src);
     videoElement.appendChild(sourceElement);
+    console.log("videoElement", videoElement);
     return videoElement;
   }
   genVideoDom2({ width, height }) {
@@ -609,6 +612,14 @@ class VideoMedia {
     videoElement.setAttribute("width", width);
     videoElement.style.display = "none";
     return videoElement;
+  }
+  setPlayButtonPos() {
+    const { x, y } = this.group.aCoords.tl;
+    $id("videoPlayButton").style.display = "block";
+    $id("videoPlayButton").style.left =
+      x + (this.group.width / 2 - 80 / 2) + "px";
+    $id("videoPlayButton").style.top =
+      y + (this.group.height / 2 - 80 / 2) + "px";
   }
   createVideo() {
     const _this = this;
@@ -642,6 +653,7 @@ class VideoMedia {
         },
         rx: 8,
         ry: 8,
+        type: "background",
       });
       var video = new fabric.Image(videoDom1, {
         originX: "center",
@@ -649,44 +661,83 @@ class VideoMedia {
         objectCaching: false,
         type: "video",
       });
-
-      const buttonImageElement = $id("videoPlayButton");
-
-      var buttonImage = new fabric.Image(buttonImageElement, {
-        originX: "center",
-        originY: "center",
-        type: "playButton",
-      });
-
-      var group = new fabric.Group([background, video, buttonImage], {
+      this.group = new fabric.Group([background, video], {
         originX: "center",
         originY: "center",
         type: "videoGroup",
       });
-
-      group.on("scaling", () => {
+      this.group.on("scaling", () => {
         showToolBar();
       });
-
+      this.group.on("moving", () => {
+        if (!_this?.isPlay) {
+          _this.setPlayButtonPos();
+        }
+      });
       var webcam = new fabric.Image(videoDom2, {
         originX: "center",
         originY: "center",
         objectCaching: false,
       });
-      canvas.add(group);
-      canvas.centerObject(group);
-
-      const findVideo = group
+      canvas.add(this.group);
+      canvas.centerObject(this.group);
+      const findVideo = this.group
         .getObjects()
         .find((item) => item.type === "video");
-
-      group.on("mousedown", function (e) {
-        // Your click event handler code here
-        console.log("Button image clicked!", e);
-        if (findVideo) {
+      findVideo.getElement().addEventListener("ended", () => {
+        _this.isPlay = false;
+      });
+      this.group.on("mouseover", function () {
+        if (!_this?.isPlay) {
+          _this.setPlayButtonPos();
+        }
+        $id("videoPlayButton").onclick = () => {
+          _this.isPlay = true;
           findVideo.getElement().play();
+          $id("videoPlayButton").style.display = "none";
+        };
+      });
+
+      // 绑定移出事件
+      this.group.on("mouseout", function (e) {
+        const { x, y } = _this.group.aCoords.tl;
+        const minX = x + (_this.group.width / 2 - 80 / 2);
+        const maxX = minX + 80;
+        const minY = y + (_this.group.height / 2 - 80 / 2);
+        const maxY = minY + 80;
+        if (
+          !(
+            minX < e.e.offsetX &&
+            e.e.offsetX < maxX &&
+            minY < e.e.offsetY &&
+            e.e.offsetY < maxY
+          )
+        ) {
+          $id("videoPlayButton").style.display = "none";
         }
       });
+
+      // 处理视频的控制条
+      // let progressBar = new fabric.Rect({
+      //   width: 0,
+      //   height: 10,
+      //   fill: "blue",
+      //   left: 200,
+      //   top: 200,
+      //   rx: 5,
+      //   ry: 5,
+      //   stroke: "black",
+      //   strokeWidth: 1,
+      //   opacity: 0.5,
+      // });
+      // canvas.add(progressBar);
+      // function updateProgressBar() {
+      //   var progress = (findVideo.getElement().currentTime / findVideo.getElement().duration) * 100;
+      //   console.log('progress', progress)
+      //   progressBar.set({ width: progress });
+      //   canvas.renderAll();
+      // }
+      // findVideo.getElement().addEventListener("timeupdate", updateProgressBar);
 
       navigator.mediaDevices
         .getUserMedia({ audio: false, video: true })

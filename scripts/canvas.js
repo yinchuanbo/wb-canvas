@@ -10,19 +10,20 @@ canvas.on("object:moving", (e) => {
 // 监听滚轮缩放画布
 canvas.on("mouse:wheel", (event) => {
   if (event.e.ctrlKey) {
-    const delta = event.e.deltaY;
-    let zoom = canvas.getZoom();
-    zoom *= 0.999 ** delta;
-    if (zoom > 10) zoom = 10;
-    if (zoom < 0.01) zoom = 0.01;
-    canvas.zoomToPoint({
-      x: event.e.offsetX,
-      y: event.e.offsetY
-    }, zoom);
-    event.e.preventDefault();
-    event.e.stopPropagation();
-    curScale.innerHTML = `${Math.round(canvas.getZoom() * 100)}%`;
-    showToolBar();
+    event.e.preventDefault()
+    // const delta = event.e.deltaY;
+    // let zoom = canvas.getZoom();
+    // zoom *= 0.999 ** delta;
+    // if (zoom > 10) zoom = 10;
+    // if (zoom < 0.01) zoom = 0.01;
+    // canvas.zoomToPoint({
+    //   x: event.e.offsetX,
+    //   y: event.e.offsetY
+    // }, zoom);
+    // event.e.preventDefault();
+    // event.e.stopPropagation();
+    // curScale.innerHTML = `${Math.round(canvas.getZoom() * 100)}%`;
+    // showToolBar();
   }
 });
 // 创建选择框
