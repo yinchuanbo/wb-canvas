@@ -49,6 +49,11 @@ class ImgMedia {
       top: this.fabricImg.top,
       src: this.fabricImg.getElement().src,
     };
+    // this.fabricImg.on("scaling", () => {
+    //   console.log('111')
+    //   this.originalImage.scaleX = this.fabricImg.scaleX;
+    //   this.originalImage.scaleY = this.fabricImg.scaleY;
+    // });
     canvas.renderAll();
   }
   backToOrigin(type = "back") {
@@ -63,18 +68,22 @@ class ImgMedia {
       newImg.src = this.originalImage.src;
       newImg.onload = () => {
         this.fabricImg = new fabric.Image(newImg);
+        const width = this.originalImage.width;
+        const height = this.originalImage.height;
+        console.log("this.originalImage", this.originalImage);
         this.fabricImg.set({
-          width: this.originalImage.width,
-          height: this.originalImage.height,
+          width,
+          height,
           left: this.originalImage.left,
           top: this.originalImage.top,
           borderColor: "#1967d2",
           cornerColor: "#1967d2",
           cornerSize: 10,
           type: "image",
+          scaleX: this.originalImage?.scaleX || 1,
+          scaleY: this.originalImage?.scaleY || 1,
         });
         canvas.add(this.fabricImg);
-        console.log(this.comScale);
         if (this.comScale !== 1) {
           this.fabricImg.scale(this.comScale, this.comScale);
           const offsetX = (this.fabricImg.width * this.comScale) / 2;
@@ -101,6 +110,22 @@ class ImgMedia {
     let _this = this;
     this.fabricImg.on("scaling", function () {
       showToolBar();
+      _this.originalImage.scaleX = _this.fabricImg.scaleX;
+      _this.originalImage.scaleY = _this.fabricImg.scaleY;
+      if (_this.isCrop) {
+        if (_this.preCropBox?.type === "circle") {
+          _this.preCropBox.left = _this.fabricImg.left;
+          _this.preCropBox.top = _this.fabricImg.top;
+          _this.preCropBox.width = _this.fabricImg.width * _this.fabricImg.scaleX;
+          _this.preCropBox.height = _this.fabricImg.height * _this.fabricImg.scaleY;
+          _this.preCropBox.radius = _this.fabricImg.width / 2;
+        } else {
+          _this.preCropBox.left = _this.fabricImg.left;
+          _this.preCropBox.top = _this.fabricImg.top;
+          _this.preCropBox.width = _this.fabricImg.width * _this.fabricImg.scaleX;
+          _this.preCropBox.height = _this.fabricImg.height * _this.fabricImg.scaleY;
+        }
+      }
     });
     this.fabricImg.on("moving", function (e) {
       _this.originalImage = {
@@ -393,14 +418,15 @@ class ImgMedia {
       preCropBox = null;
     };
   }
-  limitCrop(maxWidth, maxHeight) {}
   startCrop({ left, top, width, height, type = "rect", radius = 0 }) {
+    console.trace();
     let _this = this;
     if (this.fabricImg) {
       if (this.cropBox) {
         canvas.remove(_this.cropBox);
         _this.cropBox = null;
       }
+      console.log("走这里了");
       if (type === "circle") {
         this.cropBox = new fabric.Circle({
           radius,
@@ -420,6 +446,7 @@ class ImgMedia {
         });
         this.cropBox.on("scaling", () => {
           showToolBar("crop");
+          console.log("1111-1");
           _this.preCropBox = {
             left: _this.cropBox.left,
             top: _this.cropBox.top,
@@ -446,13 +473,6 @@ class ImgMedia {
           hasControls: true,
           type: "cropBox",
           aspe: width / height,
-        });
-        this.cropBox.on("scaling", (e) => {
-          const corner = e.transform.corner;
-          var rectBounds = _this.cropBox.getBoundingRect();
-          var imageBounds = _this.fabricImg.getBoundingRect();
-          if (corner === "tl") {
-          }
         });
       }
       canvas.add(this.cropBox);
@@ -560,6 +580,7 @@ class ImgMedia {
             imgInstance.on("scaling", () => {
               showToolBar();
             });
+            console.log("1111-2");
             _this.preCropBox = {
               left: _this.cropBox.left,
               top: _this.cropBox.top,
@@ -573,6 +594,7 @@ class ImgMedia {
             _this.cropBox = null;
             canvas.add(imgInstance);
             _this.fabricImg = imgInstance;
+
             canvas.renderAll();
           };
           return;
@@ -589,6 +611,7 @@ class ImgMedia {
         imgInstance.on("scaling", () => {
           showToolBar();
         });
+        console.log("1111-3");
         _this.preCropBox = {
           left: _this.cropBox.left,
           top: _this.cropBox.top,
@@ -602,6 +625,7 @@ class ImgMedia {
         _this.cropBox = null;
         canvas.add(imgInstance);
         _this.fabricImg = imgInstance;
+        _this.setImageComEvents();
         canvas.renderAll();
       };
     }
