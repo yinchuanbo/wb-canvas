@@ -7,7 +7,7 @@ $id("upload").addEventListener("change", (e) => {
     if (file.type.startsWith("video/")) {
       new VideoMedia(event);
     } else if (file.type.startsWith("audio/")) {
-      console.log("音频文件");
+      new AudioMedia(file);
     } else if (file.type.startsWith("image/")) {
       const imgObj = new Image();
       imgObj.src = event.target.result;
@@ -591,35 +591,42 @@ class VideoMedia {
   init() {
     this.createVideo();
   }
-  genVideoDom1({ width, height, src }) {
-    var videoElement = document.createElement("video");
-    videoElement.setAttribute("height", height);
-    videoElement.setAttribute("width", width);
-    videoElement.setAttribute("preload", "auto");
-    videoElement.style.display = "none";
-    // videoElement.autoplay = true;
-    // videoElement.loop = true;
-    // videoElement.muted = true;
-    var sourceElement = document.createElement("source");
-    sourceElement.setAttribute("src", src);
-    videoElement.appendChild(sourceElement);
-    console.log("videoElement", videoElement);
-    return videoElement;
+  genVideoDom1({ width, height, src, duration }) {
+    const html = `
+      <div class="handle__video" style="width: ${width}px;height: ${height}px">
+        <button type="button" class="play__button"></button>
+        <video style="width: 100%;height:100%;object-fit: fill" preload="auto">
+          <source src="${src}"></source>
+        </video>
+        <div class="video__controls" style="display: none">
+          <button type="button" class="play__icon"></button>
+          <span class="cur__time">00:00</span>
+          <div class="process__bar">
+            <input type="range" value="0" />
+          </div>
+          <span class="all__time">${duration}</span>
+          <button type="button" class="sound__btn">
+            <div class="change__sound">
+              <input type="range" min="0" max="100" step="1" value="70">
+            </div>
+          </button>
+        </div>
+      </div>
+    `;
+    return html_to_element(html);
   }
-  genVideoDom2({ width, height }) {
-    var videoElement = document.createElement("video");
-    videoElement.setAttribute("height", height);
-    videoElement.setAttribute("width", width);
-    videoElement.style.display = "none";
-    return videoElement;
-  }
-  setPlayButtonPos() {
-    const { x, y } = this.group.aCoords.tl;
-    $id("videoPlayButton").style.display = "block";
-    $id("videoPlayButton").style.left =
-      x + (this.group.width / 2 - 80 / 2) + "px";
-    $id("videoPlayButton").style.top =
-      y + (this.group.height / 2 - 80 / 2) + "px";
+  showVideo() {
+    const { x, y } = this.background.aCoords.tl;
+    this.videoEl.style.display = "block";
+    this.videoEl.style.position = "absolute";
+    this.videoEl.style.left = `${x + 17}px`;
+    this.videoEl.style.top = `${y + 17}px`;
+    this.videoEl.style.width = `${
+      this.background.width * this.background.scaleX - 34
+    }px`;
+    this.videoEl.style.height = `${
+      this.background.height * this.background.scaleY - 34
+    }px`;
   }
   createVideo() {
     const _this = this;
@@ -627,21 +634,17 @@ class VideoMedia {
     videoObj.src = this.videoEvent.target.result;
     this.videoSrc = videoObj.src;
     videoObj.type = "video/mp4";
-    videoObj.controls = true;
     videoObj.onloadedmetadata = () => {
-      const videoDom1 = _this.genVideoDom1({
+      _this.videoEl = _this.genVideoDom1({
         width: videoObj.videoWidth,
         height: videoObj.videoHeight,
         src: videoObj.src,
+        duration: formatTime(videoObj.duration),
       });
-      const videoDom2 = _this.genVideoDom2({
-        width: videoObj.videoWidth,
-        height: videoObj.videoHeight,
-      });
-      // 背景
-      var background = new fabric.Rect({
-        width: videoDom1.width + 2 * 17,
-        height: videoDom1.height + 2 * 17,
+      qs(document, ".container").appendChild(_this.videoEl);
+      this.background = new fabric.Rect({
+        width: videoObj.videoWidth + 2 * 17,
+        height: videoObj.videoHeight + 2 * 17,
         fill: "#fff",
         originX: "center",
         originY: "center",
@@ -653,118 +656,214 @@ class VideoMedia {
         },
         rx: 8,
         ry: 8,
-        type: "background",
-      });
-      var video = new fabric.Image(videoDom1, {
-        originX: "center",
-        originY: "center",
-        objectCaching: false,
         type: "video",
       });
-      this.group = new fabric.Group([background, video], {
-        originX: "center",
-        originY: "center",
-        type: "videoGroup",
+      canvas.add(this.background);
+      canvas.centerObject(this.background);
+      this.background.on("removed", function () {
+        _this.videoEl.remove();
       });
-      this.group.on("scaling", () => {
-        showToolBar();
+      _this.showVideo();
+      this.background.on("moving", () => {
+        _this.showVideo();
       });
-      this.group.on("moving", () => {
-        if (!_this?.isPlay) {
-          _this.setPlayButtonPos();
-        }
+      this.background.on("scaling", () => {
+        _this.showVideo();
       });
-      var webcam = new fabric.Image(videoDom2, {
-        originX: "center",
-        originY: "center",
-        objectCaching: false,
-      });
-      canvas.add(this.group);
-      canvas.centerObject(this.group);
-      const findVideo = this.group
-        .getObjects()
-        .find((item) => item.type === "video");
-      findVideo.getElement().addEventListener("ended", () => {
+      qs(_this.videoEl, ".play__button").onclick = () => {
+        qs(_this.videoEl, "video").play();
+        qs(_this.videoEl, ".play__button").style.display = "none";
+        qs(_this.videoEl, ".video__controls").style.display = "flex";
+        qs(_this.videoEl, ".play__icon").classList.add("pause");
+        _this.isPlay = true;
+      };
+      qs(_this.videoEl, "video").addEventListener("ended", () => {
         _this.isPlay = false;
+        qs(_this.videoEl, ".play__button").style.display = "block";
+        qs(_this.videoEl, ".play__icon").classList.remove("pause");
+        qs(_this.videoEl, ".video__controls").style.display = "none";
       });
-      this.group.on("mouseover", function () {
-        if (!_this?.isPlay) {
-          _this.setPlayButtonPos();
-        }
-        $id("videoPlayButton").onclick = () => {
-          _this.isPlay = true;
-          findVideo.getElement().play();
-          $id("videoPlayButton").style.display = "none";
+      qs(_this.videoEl, "video").addEventListener("timeupdate", () => {
+        if (!_this.isPlay) return;
+        qs(_this.videoEl, ".video__controls .cur__time").innerHTML = formatTime(
+          qs(_this.videoEl, "video").currentTime
+        );
+        qs(_this.videoEl, ".video__controls .process__bar input").value =
+          Math.ceil(
+            (qs(_this.videoEl, "video").currentTime / videoObj.duration) * 100
+          );
+      });
+      qs(_this.videoEl, ".video__controls .process__bar input").oninput = (
+        e
+      ) => {
+        qs(_this.videoEl, "video").pause();
+        qs(_this.videoEl, "video").currentTime =
+          (e.target.value / 100) * videoObj.duration;
+        qs(_this.videoEl, ".video__controls .cur__time").innerHTML = formatTime(
+          qs(_this.videoEl, "video").currentTime
+        );
+        qs(_this.videoEl, "video").oncanplay = () => {
+          qs(_this.videoEl, "video").play();
         };
-      });
-
-      // 绑定移出事件
-      this.group.on("mouseout", function (e) {
-        const { x, y } = _this.group.aCoords.tl;
-        const minX = x + (_this.group.width / 2 - 80 / 2);
-        const maxX = minX + 80;
-        const minY = y + (_this.group.height / 2 - 80 / 2);
-        const maxY = minY + 80;
-        if (
-          !(
-            minX < e.e.offsetX &&
-            e.e.offsetX < maxX &&
-            minY < e.e.offsetY &&
-            e.e.offsetY < maxY
-          )
-        ) {
-          $id("videoPlayButton").style.display = "none";
+      };
+      qs(_this.videoEl, ".play__icon").onclick = () => {
+        if (_this.isPlay) {
+          _this.isPlay = false; // 暂停
+          qs(_this.videoEl, "video").pause();
+          qs(_this.videoEl, ".play__icon").classList.remove("pause");
+        } else {
+          _this.isPlay = true; // 播放
+          qs(_this.videoEl, "video").play();
+          qs(_this.videoEl, ".play__icon").classList.add("pause");
         }
-      });
-
-      // 处理视频的控制条
-      // let progressBar = new fabric.Rect({
-      //   width: 0,
-      //   height: 10,
-      //   fill: "blue",
-      //   left: 200,
-      //   top: 200,
-      //   rx: 5,
-      //   ry: 5,
-      //   stroke: "black",
-      //   strokeWidth: 1,
-      //   opacity: 0.5,
-      // });
-      // canvas.add(progressBar);
-      // function updateProgressBar() {
-      //   var progress = (findVideo.getElement().currentTime / findVideo.getElement().duration) * 100;
-      //   console.log('progress', progress)
-      //   progressBar.set({ width: progress });
-      //   canvas.renderAll();
-      // }
-      // findVideo.getElement().addEventListener("timeupdate", updateProgressBar);
-
-      navigator.mediaDevices
-        .getUserMedia({ audio: false, video: true })
-        .then(function (stream) {
-          videoDom2.srcObject = stream;
-          canvas.add(webcam);
-          webcam.moveTo(0);
-          webcam.getElement().play();
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-      fabric.util.requestAnimFrame(function render() {
-        canvas.renderAll();
-        fabric.util.requestAnimFrame(render);
-      });
+      };
+      qs(_this.videoEl, ".sound__btn").onclick = () => {
+        qs(_this.videoEl, ".sound__btn").classList.toggle("show");
+      };
+      qs(_this.videoEl, ".sound__btn").oninput = (e) => {
+        qs(_this.videoEl, "video").volume = e.target.value / 100;
+      };
+      canvas.renderAll();
     };
   }
   setEvents() {
     $id("downMedia").onclick = () => {
       var selectedObject = canvas.getActiveObject();
-      if (selectedObject) {
+      if (selectedObject && selectedObject === this.background) {
         const link = document.createElement("a");
         link.href = this.videoSrc;
         link.download = "video.mp4"; // 设置下载的文件名
         link.click();
       }
+    };
+  }
+}
+
+class AudioMedia {
+  constructor(data) {
+    this.audioFile = data;
+    this.isPlay = false;
+    this.init();
+  }
+  init() {
+    this.createAudio();
+  }
+  showAudio() {
+    const { x, y } = this.background.aCoords.tl;
+    this.audioEl.style.position = "absolute";
+    this.audioEl.style.left = `${x}px`;
+    this.audioEl.style.top = `${y + 156 - 30}px`;
+  }
+  createHtml(src, duration) {
+    const html = `
+      <div class="handle__audio">
+        <audio src="${src}"></audio>
+        <div class="audio__name" contenteditable="true">${this.audioFile.name}</div>
+        <div class="audio__process">
+          <input type="range" value="0" />
+        </div>
+        <div class="audio__time">
+          <span class="audio__curTime">00:00</span>
+          <span class="audio__allTime">${duration}</span>
+        </div>
+        <div class="audio__logo"></div>
+        <div class="audio__playBtn"></div>
+      </div>
+    `;
+    return html_to_element(html);
+  }
+  createAudio() {
+    let _this = this;
+    const url = URL.createObjectURL(this.audioFile);
+    var audioElement = new Audio(url);
+    audioElement.onloadedmetadata = () => {
+      this.audioEl = this.createHtml(url, formatTime(audioElement.duration));
+      this.audio = qs(this.audioEl, "audio");
+      qs(document, ".container").appendChild(this.audioEl);
+      // 创建背景
+      this.background = new fabric.Rect({
+        width: 156,
+        height: 156,
+        fill: "#f7f7f8",
+        originX: "center",
+        originY: "center",
+        shadow: {
+          color: "rgba(0, 0, 0, 0.2)",
+          offsetX: 0,
+          offsetY: 3,
+          blur: 6,
+        },
+        rx: 8,
+        ry: 8,
+        type: "audio",
+      });
+      this.background.setControlsVisibility({
+        tl: false,
+        tr: false,
+        br: false,
+        bl: false,
+        ml: false,
+        mt: false,
+        mr: false,
+        mb: false,
+        mtr: false,
+      });
+      canvas.add(this.background);
+      canvas.centerObject(this.background);
+      _this.showAudio();
+      this.background.on("moving", () => {
+        _this.showAudio();
+      });
+      this.background.on("removed", function () {
+        _this.audioEl.remove();
+      });
+      qs(this.audioEl, ".audio__playBtn").onclick = () => {
+        if (!this.isPlay) {
+          this.isPlay = true;
+          qs(this.audioEl, ".audio__playBtn").classList.add("active");
+          qs(this.audioEl, ".audio__logo").classList.add("active");
+          this.audio.play();
+        } else {
+          this.isPlay = false;
+          qs(this.audioEl, ".audio__playBtn").classList.remove("active");
+          qs(this.audioEl, ".audio__logo").classList.remove("active");
+          this.audio.pause();
+        }
+      };
+      this.audio.addEventListener("ended", () => {
+        this.isPlay = false;
+        qs(this.audioEl, ".audio__playBtn").classList.remove("active");
+        qs(this.audioEl, ".audio__logo").classList.remove("active");
+        qs(_this.audioEl, ".audio__process input").value = 0;
+        qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML = '00:00'
+      });
+      this.audio.addEventListener("timeupdate", () => {
+        if (!_this.isPlay) return;
+        qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML =
+          formatTime(this.audio.currentTime);
+        qs(_this.audioEl, ".audio__process input").value = Math.ceil(
+          (this.audio.currentTime / this.audio.duration) * 100
+        );
+      });
+      qs(_this.audioEl, ".audio__process input").oninput = (e) => {
+        this.audio.pause();
+        this.audio.currentTime = (e.target.value / 100) * this.audio.duration;
+        qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML =
+          formatTime(this.audio.currentTime);
+        this.audio.oncanplay = () => {
+          this.audio.play();
+        };
+      };
+      $id('downMedia').onclick = () => {
+        var selectedObject = canvas.getActiveObject();
+        if (selectedObject && selectedObject === this.background) {
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "audio.mp3"; // 设置下载的文件名
+          link.click();
+        }
+      }
+      canvas.renderAll();
     };
   }
 }

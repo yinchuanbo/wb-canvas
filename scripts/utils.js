@@ -8,23 +8,27 @@ function getHiddenElementWidth(element) {
 // 重新设置 toolbar 位置
 function showToolBar() {
   $id("toolbar").style.display = "none";
-  $id("toolbar").classList.remove('active');
+  $id("toolbar").classList.remove("active");
   var selectedObject = canvas.getActiveObject();
   if (!selectedObject) return;
   let boundingRect = selectedObject.getBoundingRect();
   let dis = null;
-  if (selectedObject.type === 'cropBox') {
-    $id("toolbar").classList.remove('videoActive');
-    $id("toolbar").classList.add('active');
+  if (selectedObject.type === "cropBox") {
+    $id("toolbar").classList.remove("videoActive");
+    $id("toolbar").classList.add("active");
     dis = 138;
-  } else if(selectedObject.type === 'video' || selectedObject.type === 'videoGroup') {
-    $id("toolbar").classList.remove('active');
-    $id("toolbar").classList.add('videoActive');
-    dis = 56
+  } else if (
+    selectedObject.type === "video" ||
+    selectedObject.type === "videoGroup" ||
+    selectedObject.type === "audio"
+  ) {
+    $id("toolbar").classList.remove("active");
+    $id("toolbar").classList.add("videoActive");
+    dis = 56;
   } else {
-    $id("toolbar").classList.remove('active');
-    $id("toolbar").classList.remove('videoActive');
-    dis = 56
+    $id("toolbar").classList.remove("active");
+    $id("toolbar").classList.remove("videoActive");
+    dis = 56;
   }
   $id("toolbar").style.left =
     boundingRect.left + (boundingRect.width / 2 - dis / 2) + "px";
@@ -73,13 +77,13 @@ function exportImageFun() {
   var boundingBox = {
     left: minX - margin,
     top: minY - margin,
-    width: maxX - minX + (2 * margin),
-    height: maxY - minY + (2 * margin)
+    width: maxX - minX + 2 * margin,
+    height: maxY - minY + 2 * margin,
   };
   var tempCanvas = new fabric.Canvas(null, {
     width: boundingBox.width,
     height: boundingBox.height,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   });
   for (var i = 0; i < objects.length; i++) {
     var object = objects[i];
@@ -90,17 +94,17 @@ function exportImageFun() {
     // 调整元素位置
     object.set({
       left: left,
-      top: top
+      top: top,
     });
     tempCanvas.add(object);
   }
   var dataURL = tempCanvas.toDataURL({
-    format: 'png',
-    quality: 1
+    format: "png",
+    quality: 1,
   });
-  var link = document.createElement('a');
+  var link = document.createElement("a");
   link.href = dataURL;
-  link.download = 'image.png';
+  link.download = "image.png";
   link.click();
   // 将元素重新添加到原始画布
   for (var i = 0; i < objects.length; i++) {
@@ -109,7 +113,7 @@ function exportImageFun() {
     var top = object.top + boundingBox.top;
     object.set({
       left: left,
-      top: top
+      top: top,
     });
     canvas.add(object);
   }
@@ -119,7 +123,7 @@ function exportImageFun() {
 var isColorPickerMode = false;
 
 function getColor() {
-  canvas.defaultCursor = 'crosshair';
+  canvas.defaultCursor = "crosshair";
   canvas.selection = false;
   canvas.skipTargetFind = true;
   isColorPickerMode = !isColorPickerMode;
@@ -128,17 +132,17 @@ function getColor() {
 function pencilFun() {
   // 将画布设置成绘画模式
   canvas.isDrawingMode = true;
-  canvas.defaultCursor = 'crosshair';
+  canvas.defaultCursor = "crosshair";
   canvas.freeDrawingBrush.width = 10;
-  canvas.freeDrawingBrush.color = 'red';
+  canvas.freeDrawingBrush.color = "red";
   // canvas.freeDrawingBrush.strokeDashArray = [20, 50];
   canvas.freeDrawingBrush.shadow = new fabric.Shadow({
     blur: 5,
     offsetX: 10,
     offsetY: 0,
     affectStroke: true,
-    color: '#30e3ca'
-  })
+    color: "#30e3ca",
+  });
 }
 
 function setControlsVisibility(obj) {
@@ -153,4 +157,27 @@ function setControlsVisibility(obj) {
     mb: false,
     mtr: false,
   });
+}
+
+const qs = (dom, selector) => {
+  return dom.querySelector(selector);
+};
+
+const qsAll = (dom, selector) => {
+  return dom.querySelectorAll(selector);
+};
+
+const html_to_element = (html) => {
+  var template = document.createElement("template");
+  html = html.trim();
+  template.innerHTML = html;
+  return template.content.firstChild;
+};
+
+function formatTime(duration) {
+  const minutes = Math.floor(duration / 60);
+  const seconds = Math.floor(duration % 60);
+  const formattedMinutes = String(minutes).padStart(2, "0");
+  const formattedSeconds = String(seconds).padStart(2, "0");
+  return formattedMinutes + ":" + formattedSeconds;
 }
