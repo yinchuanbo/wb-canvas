@@ -77,23 +77,73 @@ async function asyncHandleImage({
     });
   })
 }
+function createTempAudio({
+  curTime,
+  duration,
+  left,
+  top,
+  isPlay,
+  name,
+  playRatio
+}) {
+  let html = `<div class="audio__temp" style="left: -${156}px; top: -${156}px" data-left=${left} data-top=${top}>
+    <div class="audio_main">
+      <div class="audio__logo ${isPlay ? 'active' : ''}"></div>
+      <div class="audio__playBtn ${isPlay ? 'active' : ''}"></div>
+      <div class="audio__process">
+        <div class="process__bar">
+          <div class="process__bar__left" style="width: ${playRatio}%"></div>
+        </div>
+      </div>
+      <div class="audio__time">
+        <span>${curTime}</span>
+        <span>${duration}</span>
+      </div>
+    </div>
+    <div class="audio__name" style="border-radius: 8px!important">${name}</div>
+  </div>`;
+  html = html_to_element(html)
+  qs(document, ".container").appendChild(html);
+  return html;
+}
 // 截图
 async function exportImageFun() {
+  var objects = canvas.getObjects();
   const handleVideos = document.querySelectorAll('.handle__video');
   const temoObj = [];
-  for (let i = 0; i < handleVideos.length; i++) {
-    const handleVideo = handleVideos[i];
-    const itemCanvas = await html2canvas(handleVideo);
+  const tempDom = [];
+  const tempVideoDom = Array.from(handleVideos);
+  const audioArr = objects.filter(item => item?.type === 'audio');
+  if (audioArr?.length) {
+    audioArr.forEach(item => {
+      console.log('item', item)
+      const temp = createTempAudio({
+        curTime: item.curObj?.currentTime || '00:00',
+        duration: item.duration,
+        left: item.left,
+        top: item.top,
+        isPlay: item.curObj.isPlay,
+        name: item.curObj.audioFile.name,
+        playRatio: item.curObj?.playRatio || 0
+      });
+      tempDom.push(temp);
+    })
+  }
+  const newArr = tempDom.concat(tempVideoDom)
+  for (let i = 0; i < newArr.length; i++) {
+    const item = newArr[i];
+    const itemCanvas = await html2canvas(item);
     const itemCanvasImg = itemCanvas.toDataURL("image/png");
+    const itemLeft = item.dataset?.left;
+    const itemTop = item.dataset?.top;
     const newItem = await asyncHandleImage({
       src: itemCanvasImg,
-      left: parseFloat(handleVideo.style.left),
-      top: parseFloat(handleVideo.style.top)
+      left: parseFloat(itemLeft || item.style.left),
+      top: parseFloat(itemTop || item.style.top)
     });
     temoObj.push(newItem)
   }
-  var objects = canvas.getObjects();
-  console.log('objects', objects)
+  objects = canvas.getObjects();
   var minX = objects[0].left;
   var minY = objects[0].top;
   var maxX = objects[0].left + objects[0].width;
@@ -148,9 +198,17 @@ async function exportImageFun() {
       top: top,
     });
     canvas.add(object);
+    if (object?.videoEl) {
+      qs(document, ".container").appendChild(object.videoEl);
+    } else if (object?.audioEl) {
+      qs(document, ".container").appendChild(object.audioEl);
+    }
   }
   temoObj.forEach(item => {
     canvas.remove(item)
+  })
+  tempDom.forEach(item => {
+    item.remove()
   })
   canvas.renderAll();
 }
@@ -169,15 +227,15 @@ function pencilFun() {
   canvas.isDrawingMode = true;
   canvas.defaultCursor = "crosshair";
   canvas.freeDrawingBrush.width = 10;
-  canvas.freeDrawingBrush.color = "red";
+  canvas.freeDrawingBrush.color = "#000";
   // canvas.freeDrawingBrush.strokeDashArray = [20, 50];
-  canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-    blur: 5,
-    offsetX: 10,
-    offsetY: 0,
-    affectStroke: true,
-    color: "#30e3ca",
-  });
+  // canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+  //   blur: 5,
+  //   offsetX: 10,
+  //   offsetY: 0,
+  //   affectStroke: true,
+  //   color: "#30e3ca",
+  // });
 }
 
 function setControlsVisibility(obj) {

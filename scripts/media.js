@@ -778,8 +778,6 @@ class VideoMedia {
         width: videoObj.videoWidth + 2 * 17,
         height: videoObj.videoHeight + 2 * 17,
         fill: "#fff",
-        originX: "center",
-        originY: "center",
         shadow: {
           color: "rgba(0, 0, 0, 0.2)",
           offsetX: 0,
@@ -789,10 +787,11 @@ class VideoMedia {
         rx: 8,
         ry: 8,
         type: "video",
+        videoEl: _this.videoEl
       });
       canvas.add(this.background);
       canvas.centerObject(this.background);
-      this.background.on("removed", function () {
+      this.background.on("removed", function (e) {
         _this.videoEl.remove();
       });
       _this.showVideo();
@@ -885,7 +884,6 @@ class VideoMedia {
     };
   }
 }
-
 class AudioMedia {
   constructor(data) {
     this.audioFile = data;
@@ -932,8 +930,6 @@ class AudioMedia {
         width: 156,
         height: 156,
         fill: "#f7f7f8",
-        originX: "center",
-        originY: "center",
         shadow: {
           color: "rgba(0, 0, 0, 0.2)",
           offsetX: 0,
@@ -944,6 +940,9 @@ class AudioMedia {
         ry: 8,
         type: "audio",
         hasControls: false,
+        audioEl: _this.audioEl,
+        duration: formatTime(audioElement.duration),
+        curObj: _this
       });
       canvas.add(this.background);
       canvas.centerObject(this.background);
@@ -973,12 +972,18 @@ class AudioMedia {
         qs(this.audioEl, ".audio__logo").classList.remove("active");
         qs(_this.audioEl, ".audio__process input").value = 0;
         qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML = "00:00";
+        _this.currentTime = "00:00";
+        _this.playRatio = 0;
       });
       this.audio.addEventListener("timeupdate", () => {
         if (!_this.isPlay) return;
         qs(_this.audioEl, ".audio__time .audio__curTime").innerHTML =
           formatTime(this.audio.currentTime);
         qs(_this.audioEl, ".audio__process input").value = Math.ceil(
+          (this.audio.currentTime / this.audio.duration) * 100
+        );
+        _this.currentTime = formatTime(this.audio.currentTime);
+        _this.playRatio = Math.ceil(
           (this.audio.currentTime / this.audio.duration) * 100
         );
       });
