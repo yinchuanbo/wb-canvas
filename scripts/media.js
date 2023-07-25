@@ -705,7 +705,9 @@ class ImgMedia {
         scaleY: _this.fabricImg.scaleY,
         type: _this.cropBox?.type || 'rect'
       }
-      _this.fabricImg.set('clipPath', clippingRect);
+      _this.fabricImg.set({
+        'clipPath': clippingRect
+      });
       canvas.remove(_this.cropBox);
       _this.cropBox = null;
       canvas.renderAll();

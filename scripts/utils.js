@@ -59,9 +59,41 @@ function deleteComponent(event) {
     }
   }
 }
+async function asyncHandleImage({
+  src,
+  left,
+  top
+}) {
+  return new Promise((resolve) => {
+    fabric.Image.fromURL(src, (obj) => {
+      canvas.add(obj);
+      obj.set({
+        left,
+        top,
+      })
+      canvas.renderAll();
+      console.log(888)
+      resolve(obj);
+    });
+  })
+}
 // 截图
-function exportImageFun() {
+async function exportImageFun() {
+  const handleVideos = document.querySelectorAll('.handle__video');
+  const temoObj = [];
+  for (let i = 0; i < handleVideos.length; i++) {
+    const handleVideo = handleVideos[i];
+    const itemCanvas = await html2canvas(handleVideo);
+    const itemCanvasImg = itemCanvas.toDataURL("image/png");
+    const newItem = await asyncHandleImage({
+      src: itemCanvasImg,
+      left: parseFloat(handleVideo.style.left),
+      top: parseFloat(handleVideo.style.top)
+    });
+    temoObj.push(newItem)
+  }
   var objects = canvas.getObjects();
+  console.log('objects', objects)
   var minX = objects[0].left;
   var minY = objects[0].top;
   var maxX = objects[0].left + objects[0].width;
@@ -117,6 +149,9 @@ function exportImageFun() {
     });
     canvas.add(object);
   }
+  temoObj.forEach(item => {
+    canvas.remove(item)
+  })
   canvas.renderAll();
 }
 
