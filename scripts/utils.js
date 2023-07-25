@@ -274,3 +274,29 @@ function formatTime(duration) {
   const formattedSeconds = String(seconds).padStart(2, "0");
   return formattedMinutes + ":" + formattedSeconds;
 }
+
+function setMaxSize(vW, vH, maxW = 1280, maxH = 720) {
+  let width, height;
+  if (vW / vH >= maxW / maxH) {
+    if (vW > maxW) {
+      width = maxW;
+      height = (vH * maxW) / vW;
+    } else {
+      width = vW;
+      height = vH;
+    }
+  } else {
+    if (vH > maxH) {
+      height = maxH;
+      width = (vW * maxH) / vH;
+    } else {
+      width = vW;
+      height = vH;
+    }
+  }
+
+  return {
+    width,
+    height
+  };
+}

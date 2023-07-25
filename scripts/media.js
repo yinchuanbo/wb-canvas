@@ -31,14 +31,18 @@ class ImgMedia {
   createImageCom() {
     this.fabricImg = new fabric.Image(this.imgObj);
     window.fabricImg = this.fabricImg
+    const originImgW = this.imgObj.width;
+    const originImgH = this.imgObj.height;
+    const size = setMaxSize(originImgW, originImgH)
     this.fabricImg.set({
-      width: this.imgObj.width,
-      height: this.imgObj.height,
+      width: originImgW,
+      height: originImgH,
       borderColor: "#1967d2",
       cornerColor: "#1967d2",
       cornerSize: 10,
       type: "image",
-
+      scaleX: size.width / originImgW,
+      scaleY: size.height / originImgH
     });
     canvas.add(this.fabricImg);
     canvas.centerObject(this.fabricImg);
