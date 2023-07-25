@@ -13,7 +13,7 @@ function showToolBar() {
   if (!selectedObject) return;
   let boundingRect = selectedObject.getBoundingRect();
   let dis = null;
-  if (selectedObject.type === "cropBox") {
+  if (selectedObject.type === "cropBox" || selectedObject.type === "circle") {
     $id("toolbar").classList.remove("videoActive");
     $id("toolbar").classList.add("active");
     dis = 138;

@@ -475,3 +475,34 @@ button {
   -webkit-user-select: text;
   margin: 0 auto;
 }
+
+#scale {
+  position: relative;
+}
+
+#scale .scale__range {
+  position: absolute;
+  width: 120px;
+  height: 30px;
+  background-color: #202124;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 10px);
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  box-sizing: border-box;
+  display: none;
+}
+
+#scale .scale__range.active {
+  display: flex;
+}
+
+#scale .scale__range input {
+  width: 100%;
+}

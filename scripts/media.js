@@ -22,7 +22,6 @@ class ImgMedia {
   constructor(imgObj) {
     this.imgObj = imgObj;
     this.cropBox = null;
-    this.comScale = 1;
     this.init();
   }
   init() {
@@ -30,8 +29,8 @@ class ImgMedia {
     this.setImageComEvents();
   }
   createImageCom() {
-    let _this = this;
     this.fabricImg = new fabric.Image(this.imgObj);
+    window.fabricImg = this.fabricImg
     this.fabricImg.set({
       width: this.imgObj.width,
       height: this.imgObj.height,
@@ -39,6 +38,7 @@ class ImgMedia {
       cornerColor: "#1967d2",
       cornerSize: 10,
       type: "image",
+
     });
     canvas.add(this.fabricImg);
     canvas.centerObject(this.fabricImg);
@@ -49,83 +49,42 @@ class ImgMedia {
       top: this.fabricImg.top,
       src: this.fabricImg.getElement().src,
     };
-    // this.fabricImg.on("scaling", () => {
-    //   console.log('111')
-    //   this.originalImage.scaleX = this.fabricImg.scaleX;
-    //   this.originalImage.scaleY = this.fabricImg.scaleY;
-    // });
     canvas.renderAll();
   }
   backToOrigin(type = "back") {
     if (this.originalImage) {
-      canvas.remove(this.fabricImg);
-      this.fabricImg = null;
       if (type === "back") {
         canvas.remove(this.cropBox);
         this.cropBox = null;
       }
-      const newImg = new Image();
-      newImg.src = this.originalImage.src;
-      newImg.onload = () => {
-        this.fabricImg = new fabric.Image(newImg);
-        const width = this.originalImage.width;
-        const height = this.originalImage.height;
-        console.log("this.originalImage", this.originalImage);
-        this.fabricImg.set({
-          width,
-          height,
-          left: this.originalImage.left,
-          top: this.originalImage.top,
-          borderColor: "#1967d2",
-          cornerColor: "#1967d2",
-          cornerSize: 10,
-          type: "image",
-          scaleX: this.originalImage?.scaleX || 1,
-          scaleY: this.originalImage?.scaleY || 1,
+      const scaleX = this.fabricImg.scaleX;
+      const scaleY = this.fabricImg.scaleY;
+      const clipPath = this.fabricImg.clipPath;
+      this.fabricImg.clipPath = null;
+      this.fabricImg.dirty = true;
+      if (this.offsetPos.type === 'circle') {
+        this.startCrop({
+          left: this.fabricImg.left + (this.offsetPos.x / this.offsetPos.scaleX) * scaleX,
+          top: this.fabricImg.top + (this.offsetPos.y / this.offsetPos.scaleY) * scaleY,
+          radius: clipPath.width * scaleX / 2,
+          type: 'circle'
         });
-        canvas.add(this.fabricImg);
-        if (this.comScale !== 1) {
-          this.fabricImg.scale(this.comScale, this.comScale);
-          const offsetX = (this.fabricImg.width * this.comScale) / 2;
-          const offsetY = (this.fabricImg.height * this.comScale) / 2;
-          this.fabricImg.scale(this.comScale, this.comScale);
-          const centerPoint = this.fabricImg.getCenterPoint();
-          this.fabricImg.set({
-            left: centerPoint.x - offsetX,
-            top: centerPoint.y - offsetY,
-          });
-        }
-        if (this.angle) {
-          this.fabricImg.rotate(this.angle);
-        }
-        if (type === "change") {
-          this.startCrop(this.preCropBox);
-        }
-        this.setImageComEvents();
-        canvas.renderAll();
-      };
+      } else {
+        this.startCrop({
+          left: this.fabricImg.left + (this.offsetPos.x / this.offsetPos.scaleX) * scaleX,
+          top: this.fabricImg.top + (this.offsetPos.y / this.offsetPos.scaleY) * scaleY,
+          width: clipPath.width * scaleX,
+          height: clipPath.height * scaleY
+        });
+      }
+      canvas.renderAll();
     }
   }
   setImageComEvents() {
     let _this = this;
     this.fabricImg.on("scaling", function () {
       showToolBar();
-      _this.originalImage.scaleX = _this.fabricImg.scaleX;
-      _this.originalImage.scaleY = _this.fabricImg.scaleY;
-      if (_this.isCrop) {
-        if (_this.preCropBox?.type === "circle") {
-          _this.preCropBox.left = _this.fabricImg.left;
-          _this.preCropBox.top = _this.fabricImg.top;
-          _this.preCropBox.width = _this.fabricImg.width * _this.fabricImg.scaleX;
-          _this.preCropBox.height = _this.fabricImg.height * _this.fabricImg.scaleY;
-          _this.preCropBox.radius = _this.fabricImg.width / 2;
-        } else {
-          _this.preCropBox.left = _this.fabricImg.left;
-          _this.preCropBox.top = _this.fabricImg.top;
-          _this.preCropBox.width = _this.fabricImg.width * _this.fabricImg.scaleX;
-          _this.preCropBox.height = _this.fabricImg.height * _this.fabricImg.scaleY;
-        }
-      }
+      qs($id("scale"), '.scale__range').classList.remove('active')
     });
     this.fabricImg.on("moving", function (e) {
       _this.originalImage = {
@@ -134,33 +93,112 @@ class ImgMedia {
         top: _this.fabricImg.top,
       };
       if (_this.cropBox) {
+        qs($id("scale"), '.scale__range').classList.remove('active')
         canvas.setActiveObject(_this.cropBox);
         var rectBounds = _this.cropBox.getBoundingRect();
         var imageBounds = _this.fabricImg.getBoundingRect();
         canvas.setActiveObject(_this.cropBox);
-        if (rectBounds.left < imageBounds.left) {
-          _this.fabricImg.set("left", rectBounds.left);
-        }
-        if (rectBounds.top < imageBounds.top) {
-          _this.fabricImg.set("top", rectBounds.top);
-        }
-        if (
-          rectBounds.left + rectBounds.width >
-          imageBounds.left + imageBounds.width
-        ) {
-          _this.fabricImg.set(
-            "left",
-            rectBounds.left + rectBounds.width - imageBounds.width
-          );
-        }
-        if (
-          rectBounds.top + rectBounds.height >
-          imageBounds.top + imageBounds.height
-        ) {
-          _this.fabricImg.set(
-            "top",
-            rectBounds.top + rectBounds.height - imageBounds.height
-          );
+        const angle = ((this.angle ?? 0) / 90) % 4;
+        if (angle === 0) {
+          if (rectBounds.left < imageBounds.left) {
+            _this.fabricImg.set("left", rectBounds.left);
+          }
+          if (rectBounds.top < imageBounds.top) {
+            _this.fabricImg.set("top", rectBounds.top);
+          }
+          if (
+            rectBounds.left + rectBounds.width >
+            imageBounds.left + imageBounds.width
+          ) {
+            _this.fabricImg.set(
+              "left",
+              rectBounds.left + rectBounds.width - imageBounds.width
+            );
+          }
+          if (
+            rectBounds.top + rectBounds.height >
+            imageBounds.top + imageBounds.height
+          ) {
+            _this.fabricImg.set(
+              "top",
+              rectBounds.top + rectBounds.height - imageBounds.height
+            );
+          }
+        } else if (angle === 2) {
+          if (rectBounds.left < imageBounds.left) {
+            _this.fabricImg.set("left", rectBounds.left + imageBounds.width);
+          }
+          if (rectBounds.top < imageBounds.top) {
+            _this.fabricImg.set("top", rectBounds.top + imageBounds.height);
+          }
+          if (
+            rectBounds.left + rectBounds.width >
+            imageBounds.left + imageBounds.width
+          ) {
+            _this.fabricImg.set(
+              "left",
+              rectBounds.left + rectBounds.width
+            );
+          }
+          if (
+            rectBounds.top + rectBounds.height >
+            imageBounds.top + imageBounds.height
+          ) {
+            _this.fabricImg.set(
+              "top",
+              rectBounds.top + rectBounds.height
+            );
+          }
+        } else if (angle === 1) {
+          if (rectBounds.left < imageBounds.left) {
+            _this.fabricImg.set("left", rectBounds.left + imageBounds.width);
+          }
+          if (rectBounds.top < imageBounds.top) {
+            _this.fabricImg.set("top", rectBounds.top);
+          }
+          if (
+            rectBounds.left + rectBounds.width >
+            imageBounds.left + imageBounds.width
+          ) {
+            _this.fabricImg.set(
+              "left",
+              rectBounds.left + rectBounds.width
+            );
+          }
+          if (
+            rectBounds.top + rectBounds.height >
+            imageBounds.top + imageBounds.height
+          ) {
+            _this.fabricImg.set(
+              "top",
+              rectBounds.top + rectBounds.height - imageBounds.height
+            );
+          }
+        } else if (angle === 3) {
+          if (rectBounds.left < imageBounds.left) {
+            _this.fabricImg.set("left", rectBounds.left);
+          }
+          if (rectBounds.top < imageBounds.top) {
+            _this.fabricImg.set("top", rectBounds.top + imageBounds.height);
+          }
+          if (
+            rectBounds.left + rectBounds.width >
+            imageBounds.left + imageBounds.width
+          ) {
+            _this.fabricImg.set(
+              "left",
+              rectBounds.left + rectBounds.width - imageBounds.width
+            );
+          }
+          if (
+            rectBounds.top + rectBounds.height >
+            imageBounds.top + imageBounds.height
+          ) {
+            _this.fabricImg.set(
+              "top",
+              rectBounds.top + rectBounds.height
+            );
+          }
         }
         canvas.renderAll();
       }
@@ -181,32 +219,65 @@ class ImgMedia {
     };
     // 旋转
     $id("rotate").onclick = () => {
-      if (this.fabricImg) {
-        this.fabricImg.rotate(this.fabricImg.angle + 90);
-        this.angle = this.fabricImg.angle;
+      this.fabricImg.rotate(this.fabricImg.angle + 90);
+      this.angle = this.fabricImg.angle;
+      const angle = ((this.angle ?? 0) / 90) % 4;
+      const centerPoint = this.fabricImg.getCenterPoint();
+      let adjustedLeft = null, adjustedTop = null, allW = null, allH = null;
+      if (angle === 0 || angle === 2) {
+        adjustedLeft = centerPoint.x - (this.fabricImg.getScaledWidth() / 2);
+        adjustedTop = centerPoint.y - (this.fabricImg.getScaledHeight() / 2);
+        allW = adjustedLeft + this.fabricImg.getScaledWidth();
+        allH = adjustedTop + this.fabricImg.getScaledHeight();
       } else {
-        const activeObject = canvas.getActiveObject();
-        activeObject?.rotate?.(activeObject.angle + 90);
-        this.angle = this.activeObject.angle;
+        adjustedLeft = centerPoint.x - (this.fabricImg.getScaledHeight() / 2);
+        adjustedTop = centerPoint.y - (this.fabricImg.getScaledWidth() / 2);
+        allW = adjustedLeft + this.fabricImg.getScaledHeight();
+        allH = adjustedTop + this.fabricImg.getScaledWidth();
+      }
+      if (this.cropBox.left < adjustedLeft) {
+        this.cropBox.set({
+          left: adjustedLeft
+        })
+      }
+      if (this.cropBox.top < adjustedTop) {
+        this.cropBox.set({
+          top: adjustedTop
+        })
+      }
+      if (this.cropBox.left + this.cropBox.width > allW) {
+        this.cropBox.set({
+          left: allW - this.cropBox.width
+        })
+      }
+      if (this.cropBox.top + this.cropBox.height > allH) {
+        this.cropBox.set({
+          top: allH - this.cropBox.height
+        })
       }
       canvas.renderAll();
     };
     // 缩放
-    $id("scale").onclick = () => {
-      const curActiveObject = this.fabricImg || canvas.getActiveObject();
-      if (curActiveObject) {
-        const centerPoint = curActiveObject.getCenterPoint();
-        this.comScale += 0.05;
-        const offsetX = (curActiveObject.width * this.comScale) / 2;
-        const offsetY = (curActiveObject.height * this.comScale) / 2;
-        curActiveObject.scale(this.comScale, this.comScale);
-        curActiveObject.set({
-          left: centerPoint.x - offsetX,
-          top: centerPoint.y - offsetY,
-        });
-        canvas.renderAll();
-      }
+    $id("scale").onclick = (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      const scaleRange = qs($id("scale"), '.scale__range');
+      scaleRange.classList.toggle('active')
     };
+    $id('scaleRange').oninput = (e) => {
+      const centerPoint = this.fabricImg.getCenterPoint();
+      let scaleX = this.fabricImg.scaleX;
+      let scaleY = this.fabricImg.scaleY
+      scaleX += 0.01;
+      scaleY += 0.01;
+      const offsetX = (this.fabricImg.width * scaleX) / 2;
+      const offsetY = (this.fabricImg.height * scaleY) / 2;
+      this.fabricImg.scale(scaleX, scaleY);
+      this.fabricImg.set({
+        left: centerPoint.x - offsetX,
+        top: centerPoint.y - offsetY,
+      });
+      canvas.renderAll();
+    }
     function handleCrop() {
       let { width, height, left, top, scaleX, scaleY } = _this.fabricImg;
       width = width * scaleX;
@@ -394,7 +465,6 @@ class ImgMedia {
       };
       canvas.remove(_this.cropBox);
       _this.cropBox = null;
-      // _this.fabricImg.width:_this.fabricImg.height
       let left, top, width, height;
       if (preCropBox.width > preCropBox.height) {
         height = preCropBox.height;
@@ -419,14 +489,12 @@ class ImgMedia {
     };
   }
   startCrop({ left, top, width, height, type = "rect", radius = 0 }) {
-    console.trace();
     let _this = this;
     if (this.fabricImg) {
       if (this.cropBox) {
         canvas.remove(_this.cropBox);
         _this.cropBox = null;
       }
-      console.log("走这里了");
       if (type === "circle") {
         this.cropBox = new fabric.Circle({
           radius,
@@ -441,20 +509,8 @@ class ImgMedia {
           lockScalingFlip: true,
           evented: false,
           hasControls: true,
-          type: "cropBox",
+          type: "circle",
           aspe: 1,
-        });
-        this.cropBox.on("scaling", () => {
-          showToolBar("crop");
-          console.log("1111-1");
-          _this.preCropBox = {
-            left: _this.cropBox.left,
-            top: _this.cropBox.top,
-            width: _this.cropBox.width * _this.cropBox.scaleX,
-            height: _this.cropBox.height * _this.cropBox.scaleY,
-            radius: _this.cropBox.radius,
-            type: "circle",
-          };
         });
       } else {
         this.cropBox = new fabric.Rect({
@@ -480,8 +536,9 @@ class ImgMedia {
       setControlsVisibility(this.cropBox);
       this.cropBox.on(
         "scaling",
-        function (event) {
+        function () {
           showToolBar("cropBox");
+          qs($id("scale"), '.scale__range').classList.remove('active')
           var cropBoxCoords = this.cropBox.getBoundingRect();
           var fabricImgCoords = this.fabricImg.getBoundingRect();
           if (
@@ -499,6 +556,7 @@ class ImgMedia {
               top: this.cropBox.lastTop,
             });
             this.cropBox.setCoords();
+            canvas.renderAll()
           } else {
             this.cropBox.lastScaleX = this.cropBox.scaleX;
             this.cropBox.lastScaleY = this.cropBox.scaleY;
@@ -529,105 +587,128 @@ class ImgMedia {
     let _this = this;
     if (this.cropBox) {
       this.isCrop = true;
-      var imageBounds = this.fabricImg.getBoundingRect();
-      var left = this.cropBox.left - this.fabricImg.left;
-      var top = this.cropBox.top - this.fabricImg.top;
       var width = this.cropBox.width * this.cropBox.scaleX;
       var height = this.cropBox.height * this.cropBox.scaleY;
-      var croppedImage = new Image();
-      croppedImage.src = this.fabricImg.toDataURL({
-        left: this.cropBox.left - imageBounds.left,
-        top: this.cropBox.top - imageBounds.top,
-        width: width,
-        height: height,
-        format: "png",
-      });
-      croppedImage.onload = function () {
-        if (_this.cropBox?.radius) {
-          var circleCanvas = document.createElement("canvas");
-          var ctx = circleCanvas.getContext("2d");
-          var minSize = Math.min(width, height);
-          circleCanvas.width = minSize;
-          circleCanvas.height = minSize;
-          ctx.beginPath();
-          ctx.arc(minSize / 2, minSize / 2, minSize / 2, 0, 2 * Math.PI);
-          ctx.closePath();
-          ctx.clip();
-          ctx.drawImage(
-            croppedImage,
-            0,
-            0,
-            width,
-            height,
-            0,
-            0,
-            minSize,
-            minSize
-          );
-          var circularImage = new Image();
-          circularImage.src = circleCanvas.toDataURL();
-          circularImage.onload = () => {
-            var imgInstance = new fabric.Image(circularImage, {
-              left: _this.fabricImg.left + left,
-              top: _this.fabricImg.top + top,
-              angle: 0,
-              opacity: 1,
-              cornerSize: 10,
-              hasRotatingPoint: false,
-              borderColor: "#1967d2",
-              cornerColor: "#1967d2",
-            });
-            imgInstance.on("scaling", () => {
-              showToolBar();
-            });
-            console.log("1111-2");
-            _this.preCropBox = {
-              left: _this.cropBox.left,
-              top: _this.cropBox.top,
-              width: _this.cropBox.width,
-              height: _this.cropBox.height,
-              radius: _this.cropBox.radius,
-              type: "circle",
-            };
-            canvas.remove(_this.fabricImg);
-            canvas.remove(_this.cropBox);
-            _this.cropBox = null;
-            canvas.add(imgInstance);
-            _this.fabricImg = imgInstance;
-
-            canvas.renderAll();
-          };
-          return;
+      const imgCenter = this.fabricImg.getCenterPoint()
+      const rectCenter = this.cropBox.getCenterPoint()
+      let curLeft, curTop;
+      const xAbs = Math.abs(imgCenter.x - rectCenter.x);
+      const yAbs = Math.abs(imgCenter.y - rectCenter.y);
+      if (rectCenter.x > imgCenter.x) {
+        curLeft = xAbs;
+      } else {
+        curLeft = -xAbs;
+      }
+      if (rectCenter.y > imgCenter.y) {
+        curTop = yAbs;
+      } else {
+        curTop = -yAbs;
+      }
+      let clippingRect = null;
+      const angle = ((this.angle ?? 0) / 90) % 4;
+      const cropType = _this.cropBox?.type ?? 'rect';
+      if (angle === 0) {
+        if (cropType === 'circle') {
+          clippingRect = new fabric.Circle({
+            radius: width / _this.fabricImg.scaleX / 2,
+            left: curLeft / _this.fabricImg.scaleY,
+            top: curTop / _this.fabricImg.scaleX,
+            originX: 'center',
+            originY: 'center',
+          });
+        } else {
+          clippingRect = new fabric.Rect({
+            width: width / _this.fabricImg.scaleX,
+            height: height / _this.fabricImg.scaleY,
+            left: curLeft / _this.fabricImg.scaleY,
+            top: curTop / _this.fabricImg.scaleX,
+            originX: 'center',
+            originY: 'center',
+          });
         }
-        var imgInstance = new fabric.Image(croppedImage, {
-          left: _this.fabricImg.left + left,
-          top: _this.fabricImg.top + top,
-          opacity: 1,
-          cornerSize: 10,
-          hasRotatingPoint: false,
-          borderColor: "#1967d2",
-          cornerColor: "#1967d2",
-        });
-        imgInstance.on("scaling", () => {
-          showToolBar();
-        });
-        console.log("1111-3");
-        _this.preCropBox = {
-          left: _this.cropBox.left,
-          top: _this.cropBox.top,
-          width: _this.cropBox.width * _this.cropBox.scaleX,
-          height: _this.cropBox.height * _this.cropBox.scaleY,
-          type: "rect",
-          radius: "",
-        };
-        canvas.remove(_this.fabricImg);
-        canvas.remove(_this.cropBox);
-        _this.cropBox = null;
-        canvas.add(imgInstance);
-        _this.fabricImg = imgInstance;
-        _this.setImageComEvents();
-        canvas.renderAll();
-      };
+      } else if (angle === 1) {
+        const curWidth = width / _this.fabricImg.scaleX;
+        const curHeight = height / _this.fabricImg.scaleY;
+        const curLeftVal = curLeft / _this.fabricImg.scaleY;
+        const curTopVal = curTop / _this.fabricImg.scaleX;
+        if (cropType === 'circle') {
+          clippingRect = new fabric.Circle({
+            radius: curHeight / 2,
+            left: curTopVal,
+            top: -curLeftVal,
+            originX: 'center',
+            originY: 'center',
+          });
+        } else {
+          clippingRect = new fabric.Rect({
+            width: curHeight,
+            height: curWidth,
+            left: curTopVal,
+            top: -curLeftVal,
+            originX: 'center',
+            originY: 'center',
+          });
+        }
+
+      } else if (angle === 2) {
+        const curWidth = width / _this.fabricImg.scaleX;
+        const curHeight = height / _this.fabricImg.scaleY;
+        const curLeftVal = curLeft / _this.fabricImg.scaleY;
+        const curTopVal = curTop / _this.fabricImg.scaleX;
+        if (cropType === 'circle') {
+          clippingRect = new fabric.Circle({
+            radius: curWidth / 2,
+            left: -curLeftVal,
+            top: -curTopVal,
+            originX: 'center',
+            originY: 'center',
+          });
+        } else {
+          clippingRect = new fabric.Rect({
+            width: curWidth,
+            height: curHeight,
+            left: -curLeftVal,
+            top: -curTopVal,
+            originX: 'center',
+            originY: 'center',
+          });
+        }
+
+      } else if (angle === 3) {
+        const curWidth = width / _this.fabricImg.scaleX;
+        const curHeight = height / _this.fabricImg.scaleY;
+        const curLeftVal = curLeft / _this.fabricImg.scaleY;
+        const curTopVal = curTop / _this.fabricImg.scaleX;
+        if (cropType === 'circle') {
+          clippingRect = new fabric.Circle({
+            radius: curHeight / 2,
+            left: -curTopVal,
+            top: curLeftVal,
+            originX: 'center',
+            originY: 'center',
+          });
+        } else {
+          clippingRect = new fabric.Rect({
+            width: curHeight,
+            height: curWidth,
+            left: -curTopVal,
+            top: curLeftVal,
+            originX: 'center',
+            originY: 'center',
+          });
+        }
+      }
+      _this.offsetPos = {
+        x: this.cropBox.left - this.fabricImg.left,
+        y: this.cropBox.top - this.fabricImg.top,
+        scaleX: _this.fabricImg.scaleX,
+        scaleY: _this.fabricImg.scaleY,
+        type: _this.cropBox?.type || 'rect'
+      }
+      _this.fabricImg.set('clipPath', clippingRect);
+      canvas.remove(_this.cropBox);
+      _this.cropBox = null;
+      canvas.renderAll();
     }
   }
 }
@@ -795,7 +876,8 @@ class VideoMedia {
       if (selectedObject && selectedObject === this.background) {
         const link = document.createElement("a");
         link.href = this.videoSrc;
-        link.download = "video.mp4"; // 设置下载的文件名
+        link.download = "video.mp4";
+        link.rel = 'noopener noreferrer';
         link.click();
       }
     };
