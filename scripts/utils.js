@@ -53,6 +53,9 @@ function deleteComponent(event) {
   if (event.key === "Delete") {
     const activeObject = canvas.getActiveObject();
     if (activeObject) {
+      if (activeObject?.fabricImg) {
+        canvas.remove(activeObject.fabricImg);
+      }
       canvas.remove(activeObject);
       canvas.discardActiveObject();
       canvas.renderAll();
@@ -72,7 +75,6 @@ async function asyncHandleImage({
         top,
       })
       canvas.renderAll();
-      console.log(888)
       resolve(obj);
     });
   })

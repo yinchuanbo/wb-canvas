@@ -62,14 +62,17 @@ class ImgMedia {
         this.cropBox = null;
       }
       this.fabricImg.visible = true;
-      const scaleXTemp = this.imgCopy.scaleX * this.fabricImg.scaleX;
-      const scaleYTemp = this.imgCopy.scaleY * this.fabricImg.scaleY;
+      const curFabricImgScaleX = this.fabricImg.scaleX * this.imgCopy.scaleX;
+      const curFabricImgScaleY = this.fabricImg.scaleY * this.imgCopy.scaleY;
+      const curFabricImgLeft = (this.offsetPos.x / this.offsetPos.scaleX) * curFabricImgScaleX;
+      const curFabricImgTop = (this.offsetPos.y / this.offsetPos.scaleY) * curFabricImgScaleY;
       this.fabricImg.set({
-        scaleX: scaleXTemp,
-        scaleY: scaleYTemp,
-      });
+        scaleX: curFabricImgScaleX,
+        scaleY: curFabricImgScaleY,
+        left: this.imgCopy.left - curFabricImgLeft,
+        top: this.imgCopy.top - curFabricImgTop,
+      })
       canvas.remove(this.imgCopy);
-
       this.imgCopy = null;
       const scaleX = this.fabricImg.scaleX;
       const scaleY = this.fabricImg.scaleY;
@@ -277,11 +280,19 @@ class ImgMedia {
       scaleRange.classList.toggle("active");
     };
     $id("scaleRange").oninput = (e) => {
+      const currentValue = e.target.value;
       const centerPoint = this.fabricImg.getCenterPoint();
       let scaleX = this.fabricImg.scaleX;
       let scaleY = this.fabricImg.scaleY;
-      scaleX += 0.01;
-      scaleY += 0.01;
+      if (currentValue > this.rangeVal) {
+        scaleX += 0.01;
+        scaleY += 0.01;
+      } else if (currentValue < this.rangeVal) {
+        scaleX -= 0.01;
+        scaleY -= 0.01;
+      }
+      scaleX = scaleX < 1 ? 1 : scaleX;
+      scaleY = scaleY < 1 ? 1 : scaleY;
       const offsetX = (this.fabricImg.width * scaleX) / 2;
       const offsetY = (this.fabricImg.height * scaleY) / 2;
       this.fabricImg.scale(scaleX, scaleY);
@@ -289,6 +300,8 @@ class ImgMedia {
         left: centerPoint.x - offsetX,
         top: centerPoint.y - offsetY,
       });
+
+      this.rangeVal = currentValue;
       canvas.renderAll();
     };
     function handleCrop() {
@@ -558,9 +571,9 @@ class ImgMedia {
             cropBoxCoords.left < fabricImgCoords.left ||
             cropBoxCoords.top < fabricImgCoords.top ||
             cropBoxCoords.left + cropBoxCoords.width >
-              fabricImgCoords.left + fabricImgCoords.width ||
+            fabricImgCoords.left + fabricImgCoords.width ||
             cropBoxCoords.top + cropBoxCoords.height >
-              fabricImgCoords.top + fabricImgCoords.height
+            fabricImgCoords.top + fabricImgCoords.height
           ) {
             this.cropBox.set({
               scaleX: this.cropBox.lastScaleX,
@@ -597,22 +610,42 @@ class ImgMedia {
     }
   }
   createNewCom() {
-    var croppedImage = new Image();
     var _this = this;
-    croppedImage.src = this.fabricImg.clipPath.toDataURL();
-    console.log('croppedImage.src', croppedImage.src)
-    croppedImage.onload = function () {
-      _this.imgCopy = new fabric.Image(croppedImage, {
-        left: _this.offsetPos.x + _this.fabricImg.left,
-        top: _this.offsetPos.y + _this.fabricImg.top,
+    const scaleX = this.fabricImg.scaleX;
+    const scaleY = this.fabricImg.scaleY;
+    var cropped = new Image();
+    cropped.src = canvas.toDataURL({
+      left: _this.fabricImg.left + (_this.offsetPos.x / _this.offsetPos.scaleX) * scaleX,
+      top: _this.fabricImg.top + (_this.offsetPos.y / _this.offsetPos.scaleY) * scaleY,
+      width: _this.cropBox.width * _this.cropBox.scaleX,
+      height: _this.cropBox.height * _this.cropBox.scaleY,
+    });
+    cropped.onload = function () {
+      _this.imgCopy = new fabric.Image(cropped, {
+        left:
+          _this.fabricImg.left +
+          (_this.offsetPos.x / _this.offsetPos.scaleX) * scaleX,
+        top:
+          _this.fabricImg.top +
+          (_this.offsetPos.y / _this.offsetPos.scaleY) * scaleY,
         cornerSize: 10,
         hasRotatingPoint: false,
         borderColor: "#1967d2",
         cornerColor: "#1967d2",
+        fabricImg: _this.fabricImg
       });
       canvas.add(_this.imgCopy);
+      _this.originImgCopy = {
+        left: _this.imgCopy.left,
+        top: _this.imgCopy.top,
+        width: _this.imgCopy.width,
+        height: _this.imgCopy.height,
+      }
       _this.fabricImg.visible = false;
       _this.imgCopy.on("moving", () => {
+
+      });
+      _this.imgCopy.on("scaling", () => {
 
       });
       canvas.renderAll();
@@ -642,7 +675,6 @@ class ImgMedia {
       let clippingRect = null;
       const angle = ((this.angle ?? 0) / 90) % 4;
       const cropType = _this.cropBox?.type ?? "rect";
-      let disX, disY;
       if (angle === 0) {
         const angle0Left = curLeft / _this.fabricImg.scaleX;
         const angle0Top = curTop / _this.fabricImg.scaleY;
@@ -666,12 +698,6 @@ class ImgMedia {
             originY: "center",
           });
         }
-        disX =
-          (_this.fabricImg.width / 2 + angle0Left - angle0Width / 2) *
-          _this.fabricImg.scaleX;
-        disY =
-          (_this.fabricImg.height / 2 + angle0Top - angle0Height / 2) *
-          _this.fabricImg.scaleY;
       } else if (angle === 1) {
         const curWidth = width / _this.fabricImg.scaleX;
         const curHeight = height / _this.fabricImg.scaleY;
@@ -800,12 +826,10 @@ class VideoMedia {
     this.videoEl.style.position = "absolute";
     this.videoEl.style.left = `${x + 17}px`;
     this.videoEl.style.top = `${y + 17}px`;
-    this.videoEl.style.width = `${
-      this.background.width * this.background.scaleX - 34
-    }px`;
-    this.videoEl.style.height = `${
-      this.background.height * this.background.scaleY - 34
-    }px`;
+    this.videoEl.style.width = `${this.background.width * this.background.scaleX - 34
+      }px`;
+    this.videoEl.style.height = `${this.background.height * this.background.scaleY - 34
+      }px`;
   }
   createVideo() {
     const _this = this;
