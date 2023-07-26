@@ -13,6 +13,10 @@ function showToolBar() {
   if (!selectedObject) return;
   let boundingRect = selectedObject.getBoundingRect();
   let dis = null;
+  if (selectedObject.type === 'netdiskGroup' || selectedObject.type === 'newNetdisk') {
+    setControlsVisibility(selectedObject)
+    return;
+  };
   if (selectedObject.type === "cropBox" || selectedObject.type === "circle") {
     $id("toolbar").classList.remove("videoActive");
     $id("toolbar").classList.add("active");
@@ -112,13 +116,14 @@ function createTempAudio({
 async function exportImageFun() {
   var objects = canvas.getObjects();
   const handleVideos = document.querySelectorAll('.handle__video');
+  const handleNetdiskEl = document.querySelectorAll('.netdisk__el');
   const temoObj = [];
   const tempDom = [];
   const tempVideoDom = Array.from(handleVideos);
+  const tempNetdiskDom = Array.from(handleNetdiskEl);
   const audioArr = objects.filter(item => item?.type === 'audio');
   if (audioArr?.length) {
     audioArr.forEach(item => {
-      console.log('item', item)
       const temp = createTempAudio({
         curTime: item.curObj?.currentTime || '00:00',
         duration: item.duration,
@@ -131,7 +136,7 @@ async function exportImageFun() {
       tempDom.push(temp);
     })
   }
-  const newArr = tempDom.concat(tempVideoDom)
+  const newArr = tempDom.concat(tempVideoDom, tempNetdiskDom)
   for (let i = 0; i < newArr.length; i++) {
     const item = newArr[i];
     const itemCanvas = await html2canvas(item);
