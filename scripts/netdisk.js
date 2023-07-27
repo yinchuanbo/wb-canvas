@@ -1,7 +1,6 @@
 $id('netdisk').onclick = () => {
   new Netdisk()
 }
-
 class Netdisk {
   constructor() {
     this.init();
@@ -72,7 +71,11 @@ class Netdisk {
       fontSize: 16,
       fontFamily: 'Arial',
     });
-    this.buttonGroup = new fabric.Group([this.buttonBox, this.addIcon, this.buttonText], {
+    this.buttonGroup = new fabric.Group([
+      this.buttonBox,
+      this.addIcon,
+      this.buttonText
+    ], {
       top: 270,
       type: 'buttonGroup'
     });
@@ -80,7 +83,13 @@ class Netdisk {
     this.buttonGroup.set({
       left: buttonGroupleft
     })
-    this.addGroup = new fabric.Group([this.netdiskBox, this.netdiskTitle, this.netdiskLogo, this.netdiskDesc, this.buttonGroup], {
+    this.addGroup = new fabric.Group([
+      this.netdiskBox,
+      this.netdiskTitle,
+      this.netdiskLogo,
+      this.netdiskDesc,
+      this.buttonGroup
+    ], {
       type: 'netdiskGroup'
     })
     canvas.add(this.addGroup);
@@ -112,11 +121,75 @@ class Netdisk {
             <img src="${imgObj.src}" />
           </div>
           <div class="netdisk__item_name">${file.name}</div>
+          <div class="netdisk__item_process">
+            <div class="process__bar"></div>
+          </div>
         </div>`;
-        this.editDom.insertAdjacentHTML('beforeend', itemHtml)
+        itemHtml = html_to_element(itemHtml)
+        this.editDom.appendChild(itemHtml);
+        const processDom = qs(itemHtml, '.netdisk__item_process');
+        const processBar = qs(processDom, '.process__bar');
+        incrementValue(1500, processDom, processBar)
       };
     }
     reader.readAsDataURL(file);
+  }
+  async createScreenshot() {
+    if (!this?.editDom || !this?.netdiskNewBox || this.newGroup) return;
+    const itemCanvas = await html2canvas(this.editDom, {
+      useCORS: true,
+      allowTaint: true,
+      taintTest: false,
+      scale: 1,
+    });
+    const itemCanvasImg = itemCanvas.toDataURL("image/png", 1.0);
+    if (this?.editDom) {
+      this.editDom.style.display = 'none';
+    }
+    fabric.Image.fromURL(itemCanvasImg, (img) => {
+      img.set({
+        left: 40,
+        top: 40
+      });
+      const top = this.netdiskNewBox.top;
+      const left = this.netdiskNewBox.left;
+      this.netdiskNewBox.visible = false;
+      const clonedRect = new fabric.Rect({
+        width: 518,
+        height: 363,
+        left: 0,
+        top: 0,
+        fill: "#fff",
+        rx: 8,
+        ry: 8,
+        stroke: "#b2b2b2",
+        strokeWidth: 2,
+        type: "netdisk"
+      });
+      this.newGroup = new fabric.Group([clonedRect, img], {
+        top,
+        left
+      });
+      canvas.add(this.newGroup);
+      this.newGroup.on('mousedown', () => {
+        this.newGroupSelected();
+        canvas.setActiveObject(this.netdiskNewBox)
+      })
+      canvas.renderAll()
+    })
+  }
+  newGroupSelected() {
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject === this.newGroup) {
+      this.netdiskNewBox.visible = true;
+      if (this?.editDom) {
+        this.editDom.style.display = 'grid';
+      }
+      if (this?.newGroup) {
+        canvas.remove(this.newGroup);
+        this.newGroup = null;
+      }
+    }
   }
   changeCom() {
     let saveAddGroupInfo = {
@@ -144,8 +217,29 @@ class Netdisk {
     this.netdiskNewBox.on('scaling', () => {
       this.changeEditDom()
     })
+    this.netdiskNewBox.on('removed', () => {
+      if (this.editDom) {
+        this.editDom.remove()
+      }
+    })
     // 创建 DOM
     this.createEditDom();
+    canvas.on("selection:updated", () => {
+      const activeObject = canvas.getActiveObject();
+      // this.newGroupSelected();
+      // if (!(activeObject && activeObject === this.netdiskNewBox)) {
+      //   this.createScreenshot()
+      // }
+    });
+    canvas.on("selection:created", () => {
+      // this.newGroupSelected();
+    });
+    canvas.on("selection:cleared", () => {
+      const activeObject = canvas.getActiveObject();
+      // if (!activeObject || activeObject !== this.netdiskNewBox) {
+      //   this.createScreenshot()
+      // }
+    });
     canvas.renderAll();
   }
   changeEditDom() {

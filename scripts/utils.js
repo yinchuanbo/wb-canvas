@@ -116,11 +116,11 @@ function createTempAudio({
 async function exportImageFun() {
   var objects = canvas.getObjects();
   const handleVideos = document.querySelectorAll('.handle__video');
-  const handleNetdiskEl = document.querySelectorAll('.netdisk__el');
+  // const handleNetdiskEl = document.querySelectorAll('.netdisk__el');
   const temoObj = [];
   const tempDom = [];
   const tempVideoDom = Array.from(handleVideos);
-  const tempNetdiskDom = Array.from(handleNetdiskEl);
+  // const tempNetdiskDom = Array.from(handleNetdiskEl);
   const audioArr = objects.filter(item => item?.type === 'audio');
   if (audioArr?.length) {
     audioArr.forEach(item => {
@@ -136,7 +136,8 @@ async function exportImageFun() {
       tempDom.push(temp);
     })
   }
-  const newArr = tempDom.concat(tempVideoDom, tempNetdiskDom)
+  // const newArr = tempDom.concat(tempVideoDom, tempNetdiskDom)
+  const newArr = tempDom.concat(tempVideoDom)
   for (let i = 0; i < newArr.length; i++) {
     const item = newArr[i];
     const itemCanvas = await html2canvas(item);
@@ -306,4 +307,20 @@ function setMaxSize(vW, vH, maxW = 1280, maxH = 720) {
     width,
     height
   };
+}
+
+function incrementValue(duration = 1000, processDom, processBar) {
+  let value = 0;
+  const increment = 1;
+  const targetValue = 100;
+  const interval = duration / targetValue; // Interval for each increment in milliseconds
+
+  const timer = setInterval(() => {
+    value += increment;
+    processBar.style.width = `${value}%`
+    if (value >= targetValue) {
+      processDom.remove();
+      clearInterval(timer);
+    }
+  }, interval);
 }
