@@ -1,6 +1,6 @@
-$id('netdisk').onclick = () => {
-  new Netdisk()
-}
+$id("netdisk").onclick = () => {
+  new Netdisk();
+};
 class Netdisk {
   constructor() {
     this.init();
@@ -19,38 +19,44 @@ class Netdisk {
       ry: 8,
       stroke: "#b2b2b2",
       strokeWidth: 2,
-      type: "netdisk"
+      type: "netdisk",
     });
-    this.netdiskTitle = new fabric.Text('Untitled', {
+    this.netdiskTitle = new fabric.Text("Untitled", {
       left: 0,
       top: 10,
-      fill: '#464646',
+      fill: "#464646",
       fontSize: 16,
-      fontFamily: 'Arial',
+      fontFamily: "Arial",
     });
-    this.netdiskLogo = new fabric.Image(qs(document, '#netdiskLogo'), {
+    this.netdiskLogo = new fabric.Image(qs(document, "#netdiskLogo"), {
       left: 0,
       top: 70,
     });
-    this.netdiskDesc = new fabric.Text('Drag files here, or click the “Select Files”', {
-      left: 0,
-      top: 200,
-      fill: '#9A9A9A',
-      fontSize: 14,
-      fontFamily: 'Arial',
-    });
-    const netdiskTitleLeft = (this.netdiskBox.width - this.netdiskTitle.width) / 2;
-    const netdiskLogoLeft = (this.netdiskBox.width - this.netdiskLogo.width) / 2;
-    const netdiskDescLeft = (this.netdiskBox.width - this.netdiskDesc.width) / 2;
+    this.netdiskDesc = new fabric.Text(
+      "Drag files here, or click the “Select Files”",
+      {
+        left: 0,
+        top: 200,
+        fill: "#9A9A9A",
+        fontSize: 14,
+        fontFamily: "Arial",
+      }
+    );
+    const netdiskTitleLeft =
+      (this.netdiskBox.width - this.netdiskTitle.width) / 2;
+    const netdiskLogoLeft =
+      (this.netdiskBox.width - this.netdiskLogo.width) / 2;
+    const netdiskDescLeft =
+      (this.netdiskBox.width - this.netdiskDesc.width) / 2;
     this.netdiskTitle.set({
-      left: netdiskTitleLeft
-    })
+      left: netdiskTitleLeft,
+    });
     this.netdiskLogo.set({
-      left: netdiskLogoLeft
-    })
+      left: netdiskLogoLeft,
+    });
     this.netdiskDesc.set({
-      left: netdiskDescLeft
-    })
+      left: netdiskDescLeft,
+    });
     this.buttonBox = new fabric.Rect({
       width: 140,
       height: 40,
@@ -58,53 +64,56 @@ class Netdisk {
       rx: 20,
       ry: 20,
       stroke: "#464646",
-      strokeWidth: 1
+      strokeWidth: 1,
     });
-    this.addIcon = new fabric.Image(qs(document, '#addIcon'), {
+    this.addIcon = new fabric.Image(qs(document, "#addIcon"), {
       top: 7,
-      left: 10
+      left: 10,
     });
-    this.buttonText = new fabric.Text('Select Files', {
+    this.buttonText = new fabric.Text("Select Files", {
       left: 40,
       top: 10,
-      fill: '#464646',
+      fill: "#464646",
       fontSize: 16,
-      fontFamily: 'Arial',
+      fontFamily: "Arial",
     });
-    this.buttonGroup = new fabric.Group([
-      this.buttonBox,
-      this.addIcon,
-      this.buttonText
-    ], {
-      top: 270,
-      type: 'buttonGroup'
-    });
-    const buttonGroupleft = (this.netdiskBox.width - this.buttonGroup.width) / 2;
+    this.buttonGroup = new fabric.Group(
+      [this.buttonBox, this.addIcon, this.buttonText],
+      {
+        top: 270,
+        type: "buttonGroup",
+      }
+    );
+    const buttonGroupleft =
+      (this.netdiskBox.width - this.buttonGroup.width) / 2;
     this.buttonGroup.set({
-      left: buttonGroupleft
-    })
-    this.addGroup = new fabric.Group([
-      this.netdiskBox,
-      this.netdiskTitle,
-      this.netdiskLogo,
-      this.netdiskDesc,
-      this.buttonGroup
-    ], {
-      type: 'netdiskGroup'
-    })
+      left: buttonGroupleft,
+    });
+    this.addGroup = new fabric.Group(
+      [
+        this.netdiskBox,
+        this.netdiskTitle,
+        this.netdiskLogo,
+        this.netdiskDesc,
+        this.buttonGroup,
+      ],
+      {
+        type: "netdiskGroup",
+      }
+    );
     canvas.add(this.addGroup);
     canvas.centerObject(this.addGroup);
-    this.addGroup.on('mousedown', (e) => {
+    this.addGroup.on("mousedown", (e) => {
       const curX = e.pointer.x - this.addGroup.left;
       const curY = e.pointer.y - this.addGroup.top;
       if (curX > 190 && curX < 327 && curY > 270 && curY < 309) {
-        canvas.discardActiveObject()
+        canvas.discardActiveObject();
         setTimeout(() => {
           _this.openFile();
-        }, 200)
+        }, 200);
       }
-    })
-    canvas.renderAll()
+    });
+    canvas.renderAll();
   }
   handleFile(file) {
     const reader = new FileReader();
@@ -115,23 +124,22 @@ class Netdisk {
         if (!this?.netdiskNewBox) {
           this.changeCom();
         }
-        // 生成 dom
         let itemHtml = `<div class="netdisk__el_item">
           <div class="netdisk__item_img">
-            <img src="${imgObj.src}" alt="" />
+            <img src="${imgObj.src}" crossOrigin="anonymous" />
           </div>
           <div class="netdisk__item_name">${file.name}</div>
           <div class="netdisk__item_process">
             <div class="process__bar"></div>
           </div>
         </div>`;
-        itemHtml = html_to_element(itemHtml)
+        itemHtml = html_to_element(itemHtml);
         this.editDom.appendChild(itemHtml);
-        const processDom = qs(itemHtml, '.netdisk__item_process');
-        const processBar = qs(processDom, '.process__bar');
-        incrementValue(1500, processDom, processBar)
+        const processDom = qs(itemHtml, ".netdisk__item_process");
+        const processBar = qs(processDom, ".process__bar");
+        incrementValue(1500, processDom, processBar);
       };
-    }
+    };
     reader.readAsDataURL(file);
   }
   newGroupSelected() {
@@ -139,7 +147,7 @@ class Netdisk {
     if (activeObject && activeObject === this.newGroup) {
       this.netdiskNewBox.visible = true;
       if (this?.editDom) {
-        this.editDom.style.display = 'grid';
+        this.editDom.style.display = "grid";
       }
       if (this?.newGroup) {
         canvas.remove(this.newGroup);
@@ -149,15 +157,18 @@ class Netdisk {
   }
   async handleEditDom() {
     if (this?.editDom) {
-      var scrollTop = this.editDom.scrollTop;
-      console.log(scrollTop);
       const outerHTML = this.editDom.outerHTML;
       var parser = new DOMParser();
       var doc = parser.parseFromString(outerHTML, "text/html");
       var outerDiv = doc.querySelector("div");
       outerDiv.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-      var updatedHtmlString = outerDiv.outerHTML.replace(/<img([^>]+)>/g, '<img$1/>');
-      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='440' height='285'>
+      var updatedHtmlString = outerDiv.outerHTML.replace(
+        /<img([^>]+)>/g,
+        "<img$1/>"
+      );
+      const classnameTemp = generateRandomString(32);
+      var distop = this.editDom.scrollTop;
+      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='440' height='285' class="${classnameTemp}" data-top="${distop}">
         <style>
           .netdisk__el {
             display: grid;
@@ -166,7 +177,7 @@ class Netdisk {
             overflow-x: hidden;
             overflow-y: auto;
             user-select: none;
-            background: #fff,
+            background: #fff
           }
           .netdisk__el::-webkit-scrollbar {
             width: 6px;
@@ -207,20 +218,26 @@ class Netdisk {
         <foreignObject width='440' height='285'>
           ${updatedHtmlString}
         </foreignObject>
+        <script>
+          const svgDom = document.querySelector(".${classnameTemp}");
+          const disTop = svgDom.dataset.top;
+          const netdiskEl = svgDom.querySelector(".netdisk__el");
+          netdiskEl.scrollTop = disTop;
+        </script>
       </svg>`;
       var DOMURL = self.URL || self.webkitURL || self;
       var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
       var url = DOMURL.createObjectURL(svg);
-      const img = new Image()
+      const img = new Image();
       img.onload = () => {
-        this.editDom.style.display = 'none';
+        this.editDom.style.display = "none";
         this.netdiskNewBox.visible = false;
         const svgImg = new fabric.Image(img, {
           left: 40,
           top: 40,
           width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX - 80,
           height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY - 80,
-          selectable: false
+          selectable: false,
         });
         const clonedRect = new fabric.Rect({
           width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX,
@@ -232,45 +249,52 @@ class Netdisk {
           ry: 8,
           stroke: "#b2b2b2",
           strokeWidth: 2,
-          type: "netdisk"
+          type: "netdisk",
         });
         this.svgGroup = new fabric.Group([clonedRect, svgImg], {
           top: this.netdiskNewBox.top,
-          left: this.netdiskNewBox.left
-        })
-        this.svgGroup.on('scaling', () => {
+          left: this.netdiskNewBox.left,
+        });
+        this.svgGroup.on("scaling", () => {
           this.changeEditDom(this.svgGroup);
           this.netdiskNewBox.set({
             scaleX: this.svgGroup.scaleX,
-            scaleY: this.svgGroup.scaleY
-          })
-        })
-        this.svgGroup.on('moving', () => {
+            scaleY: this.svgGroup.scaleY,
+          });
+        });
+        this.svgGroup.on("moving", () => {
           this.changeEditDom(this.svgGroup);
           this.netdiskNewBox.set({
             left: this.svgGroup.left,
-            top: this.svgGroup.top
-          })
-        })
-        canvas.add(this.svgGroup)
-        canvas.renderAll()
-        console.log('url', url)
+            top: this.svgGroup.top,
+          });
+        });
+        this.svgGroup.on("mousedown", () => {
+          canvas.discardActiveObject();
+        });
+        this.svgGroup.on("mousemove", () => {
+          canvas.discardActiveObject();
+        });
+        this.svgGroup.on("mouseup", () => {
+          if (this?.svgGroup) {
+            canvas.remove(this.svgGroup);
+            this.svgGroup = null;
+          }
+          if (this?.editDom) {
+            this.editDom.style.display = "grid";
+          }
+          if (this?.netdiskNewBox) {
+            this.netdiskNewBox.visible = true;
+            console.log("111-3");
+            canvas.setActiveObject(this.netdiskNewBox);
+          }
+        });
+        console.log("url", url);
+        canvas.add(this.svgGroup);
         // DOMURL.revokeObjectURL(url);
+        canvas.renderAll();
       };
       img.src = url;
-    }
-  }
-  backToEdit() {
-    if (this?.svgGroup) {
-      canvas.remove(this.svgGroup)
-      this.svgGroup = null;
-    }
-    if (this?.editDom) {
-      this.editDom.style.display = 'grid'
-    }
-    if (this?.netdiskNewBox) {
-      this.netdiskNewBox.visible = true
-      canvas.setActiveObject(this.netdiskNewBox)
     }
   }
   changeCom() {
@@ -279,68 +303,56 @@ class Netdisk {
       left: this.addGroup.left,
       width: this.addGroup.width,
       height: this.addGroup.height,
-    }
+    };
     this.addGroup.visible = false;
-    // 新建一个结构
     this.netdiskNewBox = new fabric.Rect({
-      ...saveAddGroupInfo, ...{
+      ...saveAddGroupInfo,
+      ...{
         fill: "#fff",
         rx: 8,
         ry: 8,
         stroke: "#b2b2b2",
         strokeWidth: 2,
         type: "newNetdisk",
-        newNetdisk: this
-      }
+        newNetdisk: this,
+      },
     });
     canvas.add(this.netdiskNewBox);
-    this.netdiskNewBox.on('moving', () => {
-      this.changeEditDom()
-    })
-    this.netdiskNewBox.on('scaling', () => {
-      this.changeEditDom()
-    })
-    this.netdiskNewBox.on('removed', () => {
+    this.netdiskNewBox.on("moving", () => {
+      this.changeEditDom();
+    });
+    this.netdiskNewBox.on("scaling", () => {
+      this.changeEditDom();
+    });
+    this.netdiskNewBox.on("removed", () => {
       if (this.editDom) {
-        this.editDom.remove()
+        this.editDom.remove();
       }
-    })
-    // 创建 DOM
+    });
     this.createEditDom();
     canvas.on("selection:updated", () => {
       const activeObject = canvas.getActiveObject();
       const isNewBox = activeObject === this?.netdiskNewBox;
-      const isSvgGroup = activeObject === this?.svgGroup;
-      if (isNewBox) {
-        this.backToEdit()
-      } else {
+      if (!isNewBox) {
         if (this?.netdiskNewBox?.visible) {
-          this.handleEditDom()
+          this.handleEditDom();
         }
-      }
-      if (isSvgGroup) {
-        this.backToEdit()
       }
     });
     canvas.on("selection:created", () => {
       const activeObject = canvas.getActiveObject();
       const isNewBox = activeObject === this?.netdiskNewBox;
-      const isSvgGroup = activeObject === this?.svgGroup;
-      if (isNewBox) {
-        this.backToEdit()
-      } else {
+      if (!isNewBox) {
         if (this?.netdiskNewBox?.visible) {
-          this.handleEditDom()
+          this.handleEditDom();
         }
-      }
-      if (isSvgGroup) {
-        this.backToEdit()
       }
     });
     canvas.on("selection:cleared", (e) => {
       if (!this?.netdiskNewBox?.visible || !this?.netdiskNewBox) return;
-      this.handleEditDom()
+      this.handleEditDom();
     });
+    canvas.setActiveObject(this.netdiskNewBox);
     canvas.renderAll();
   }
   changeEditDom(dom = this.netdiskNewBox) {
@@ -359,21 +371,22 @@ class Netdisk {
     this.editDom.style.left = `${this.netdiskNewBox.left + 40}px`;
     this.editDom.style.top = `${this.netdiskNewBox.top + 40}px`;
     qs(document, ".container").appendChild(this.editDom);
-    // 监听元素拖入
     this.editDom.ondragover = (e) => {
       e.preventDefault();
-    }
+    };
     this.editDom.ondrop = (e) => {
       e.preventDefault();
       var fileList = e.dataTransfer.files;
       for (var i = 0; i < fileList.length; i++) {
-        this.handleFile(fileList[i])
+        this.handleFile(fileList[i]);
       }
-    }
+    };
     this.editDom.onpointerdown = (event) => {
       const initialX = event.clientX;
       const initialY = event.clientY;
-      let left = this.netdiskNewBox.left, top = this.netdiskNewBox.top;
+      let left = this.netdiskNewBox.left,
+        top = this.netdiskNewBox.top;
+      console.log("111-2");
       canvas.setActiveObject(this.netdiskNewBox);
       canvas.renderAll();
       const handlePointerMove = (event) => {
@@ -381,15 +394,15 @@ class Netdisk {
         const deltaY = event.clientY - initialY;
         this.netdiskNewBox.set({
           left: left + deltaX,
-          top: top + deltaY
-        })
-        this.changeEditDom()
+          top: top + deltaY,
+        });
+        this.changeEditDom();
         canvas.renderAll();
-      }
+      };
       const handlePointerUp = () => {
         this.editDom.onpointermove = null;
         this.editDom.onpointerup = null;
-      }
+      };
       this.editDom.onpointermove = handlePointerMove;
       this.editDom.onpointerup = handlePointerUp;
     };
@@ -400,9 +413,9 @@ class Netdisk {
         multiple: true,
         types: [
           {
-            description: 'Image Files',
+            description: "Image Files",
             accept: {
-              'image/*': ['.png', '.jpg', '.jpeg'],
+              "image/*": [".png", ".jpg", ".jpeg"],
             },
           },
         ],
@@ -410,10 +423,10 @@ class Netdisk {
       const handles = await window.showOpenFilePicker(options);
       for (const handle of handles) {
         const file = await handle.getFile();
-        this.handleFile(file)
+        this.handleFile(file);
       }
     } catch (error) {
-      console.error('Error opening file:', error);
+      console.error("Error opening file:", error);
     }
   }
 }

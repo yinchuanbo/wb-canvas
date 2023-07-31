@@ -13,10 +13,13 @@ function showToolBar() {
   if (!selectedObject) return;
   let boundingRect = selectedObject.getBoundingRect();
   let dis = null;
-  if (selectedObject.type === 'netdiskGroup' || selectedObject.type === 'newNetdisk') {
-    setControlsVisibility(selectedObject)
+  if (
+    selectedObject.type === "netdiskGroup" ||
+    selectedObject.type === "newNetdisk"
+  ) {
+    setControlsVisibility(selectedObject);
     return;
-  };
+  }
   if (selectedObject.type === "cropBox" || selectedObject.type === "circle") {
     $id("toolbar").classList.remove("videoActive");
     $id("toolbar").classList.add("active");
@@ -57,36 +60,32 @@ function deleteComponent(event) {
   if (event.key === "Delete") {
     let activeObject = canvas.getActiveObject();
     if (activeObject) {
-      console.log('activeObject', activeObject)
+      console.log("activeObject", activeObject);
       if (activeObject?.fabricImg) {
         canvas.remove(activeObject.fabricImg);
       }
       if (activeObject?.newNetdisk) {
-        activeObject.newNetdisk.netdiskNewBox = null
+        activeObject.newNetdisk.netdiskNewBox = null;
       }
       canvas.remove(activeObject);
       canvas.discardActiveObject();
-      activeObject = null
+      activeObject = null;
       canvas.renderAll();
     }
   }
 }
-async function asyncHandleImage({
-  src,
-  left,
-  top
-}) {
+async function asyncHandleImage({ src, left, top }) {
   return new Promise((resolve) => {
     fabric.Image.fromURL(src, (obj) => {
       canvas.add(obj);
       obj.set({
         left,
         top,
-      })
+      });
       canvas.renderAll();
       resolve(obj);
     });
-  })
+  });
 }
 function createTempAudio({
   curTime,
@@ -95,12 +94,12 @@ function createTempAudio({
   top,
   isPlay,
   name,
-  playRatio
+  playRatio,
 }) {
   let html = `<div class="audio__temp" style="left: -${156}px; top: -${156}px" data-left=${left} data-top=${top}>
     <div class="audio_main">
-      <div class="audio__logo ${isPlay ? 'active' : ''}"></div>
-      <div class="audio__playBtn ${isPlay ? 'active' : ''}"></div>
+      <div class="audio__logo ${isPlay ? "active" : ""}"></div>
+      <div class="audio__playBtn ${isPlay ? "active" : ""}"></div>
       <div class="audio__process">
         <div class="process__bar">
           <div class="process__bar__left" style="width: ${playRatio}%"></div>
@@ -113,37 +112,37 @@ function createTempAudio({
     </div>
     <div class="audio__name" style="border-radius: 8px!important">${name}</div>
   </div>`;
-  html = html_to_element(html)
+  html = html_to_element(html);
   qs(document, ".container").appendChild(html);
   return html;
 }
 // 截图
 async function exportImageFun() {
   var objects = canvas.getObjects();
-  objects = objects.filter(item => item.visible !== false);
-  const handleVideos = document.querySelectorAll('.handle__video');
+  objects = objects.filter((item) => item.visible !== false);
+  const handleVideos = document.querySelectorAll(".handle__video");
   // const handleNetdiskEl = document.querySelectorAll('.netdisk__el');
   const temoObj = [];
   const tempDom = [];
   const tempVideoDom = Array.from(handleVideos);
   // const tempNetdiskDom = Array.from(handleNetdiskEl);
-  const audioArr = objects.filter(item => item?.type === 'audio');
+  const audioArr = objects.filter((item) => item?.type === "audio");
   if (audioArr?.length) {
-    audioArr.forEach(item => {
+    audioArr.forEach((item) => {
       const temp = createTempAudio({
-        curTime: item.curObj?.currentTime || '00:00',
+        curTime: item.curObj?.currentTime || "00:00",
         duration: item.duration,
         left: item.left,
         top: item.top,
         isPlay: item.curObj.isPlay,
         name: item.curObj.audioFile.name,
-        playRatio: item.curObj?.playRatio || 0
+        playRatio: item.curObj?.playRatio || 0,
       });
       tempDom.push(temp);
-    })
+    });
   }
   // const newArr = tempDom.concat(tempVideoDom, tempNetdiskDom)
-  const newArr = tempDom.concat(tempVideoDom)
+  const newArr = tempDom.concat(tempVideoDom);
   for (let i = 0; i < newArr.length; i++) {
     const item = newArr[i];
     const itemCanvas = await html2canvas(item);
@@ -153,14 +152,12 @@ async function exportImageFun() {
     const newItem = await asyncHandleImage({
       src: itemCanvasImg,
       left: parseFloat(itemLeft || item.style.left),
-      top: parseFloat(itemTop || item.style.top)
+      top: parseFloat(itemTop || item.style.top),
     });
-    temoObj.push(newItem)
+    temoObj.push(newItem);
   }
   objects = canvas.getObjects();
-  objects = objects.filter(item => item.visible !== false);
-
-  console.log('objects', objects)
+  objects = objects.filter((item) => item.visible !== false);
   var minX = objects[0].left;
   var minY = objects[0].top;
   var maxX = objects[0].left + objects[0].width;
@@ -197,6 +194,7 @@ async function exportImageFun() {
     });
     tempCanvas.add(object);
   }
+  console.log('tempCanvas', tempCanvas)
   var dataURL = tempCanvas.toDataURL({
     format: "png",
     quality: 1,
@@ -221,12 +219,12 @@ async function exportImageFun() {
       qs(document, ".container").appendChild(object.audioEl);
     }
   }
-  temoObj.forEach(item => {
-    canvas.remove(item)
-  })
-  tempDom.forEach(item => {
-    item.remove()
-  })
+  temoObj.forEach((item) => {
+    canvas.remove(item);
+  });
+  tempDom.forEach((item) => {
+    item.remove();
+  });
   canvas.renderAll();
 }
 
@@ -314,7 +312,7 @@ function setMaxSize(vW, vH, maxW = 1280, maxH = 720) {
 
   return {
     width,
-    height
+    height,
   };
 }
 
@@ -323,13 +321,23 @@ function incrementValue(duration = 1000, processDom, processBar) {
   const increment = 1;
   const targetValue = 100;
   const interval = duration / targetValue; // Interval for each increment in milliseconds
-
   const timer = setInterval(() => {
     value += increment;
-    processBar.style.width = `${value}%`
+    processBar.style.width = `${value}%`;
     if (value >= targetValue) {
       processDom.remove();
       clearInterval(timer);
     }
   }, interval);
+}
+
+function generateRandomString(length) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
