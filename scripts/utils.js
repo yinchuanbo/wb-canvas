@@ -194,7 +194,6 @@ async function exportImageFun() {
     });
     tempCanvas.add(object);
   }
-  console.log('tempCanvas', tempCanvas)
   var dataURL = tempCanvas.toDataURL({
     format: "png",
     quality: 1,
@@ -340,4 +339,13 @@ function generateRandomString(length) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
+}
+
+function blobToBase64(blob) {
+  var reader = new FileReader();
+  reader.readAsDataURL(blob);
+  reader.onloadend = function() {
+    var base64String = reader.result;
+    console.log(base64String);
+  };
 }

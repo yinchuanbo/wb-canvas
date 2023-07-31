@@ -157,12 +157,10 @@ class Netdisk {
   }
   async handleEditDom() {
     if (this?.editDom) {
-      const outerHTML = this.editDom.outerHTML;
-      var parser = new DOMParser();
-      var doc = parser.parseFromString(outerHTML, "text/html");
-      var outerDiv = doc.querySelector("div");
-      outerDiv.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-      var updatedHtmlString = outerDiv.outerHTML.replace(
+      let cloneDom = this.editDom.cloneNode(true);
+      cloneDom.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      let outerHTML = cloneDom.outerHTML;
+      outerHTML = outerHTML.replace(
         /<img([^>]+)>/g,
         "<img$1/>"
       );
@@ -216,7 +214,7 @@ class Netdisk {
           }
         </style>
         <foreignObject width='440' height='285'>
-          ${updatedHtmlString}
+          ${outerHTML}
         </foreignObject>
         <script>
           const svgDom = document.querySelector(".${classnameTemp}");
@@ -225,11 +223,13 @@ class Netdisk {
           netdiskEl.scrollTop = disTop;
         </script>
       </svg>`;
-      var DOMURL = self.URL || self.webkitURL || self;
       var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
-      var url = DOMURL.createObjectURL(svg);
+      var url = URL.createObjectURL(svg);
       const img = new Image();
+      img.src = url;
+      img.setAttribute('crossorigin', 'anonymous')
       img.onload = () => {
+        console.log('img', img)
         this.editDom.style.display = "none";
         this.netdiskNewBox.visible = false;
         const svgImg = new fabric.Image(img, {
@@ -237,7 +237,7 @@ class Netdisk {
           top: 40,
           width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX - 80,
           height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY - 80,
-          selectable: false,
+          crossOrigin: "anonymous"
         });
         const clonedRect = new fabric.Rect({
           width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX,
@@ -254,6 +254,7 @@ class Netdisk {
         this.svgGroup = new fabric.Group([clonedRect, svgImg], {
           top: this.netdiskNewBox.top,
           left: this.netdiskNewBox.left,
+          crossOrigin: "anonymous"
         });
         this.svgGroup.on("scaling", () => {
           this.changeEditDom(this.svgGroup);
@@ -294,7 +295,7 @@ class Netdisk {
         // DOMURL.revokeObjectURL(url);
         canvas.renderAll();
       };
-      img.src = url;
+      
     }
   }
   changeCom() {
