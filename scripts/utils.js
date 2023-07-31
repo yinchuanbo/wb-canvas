@@ -55,13 +55,18 @@ function handleResize() {
 // 处理组件删除
 function deleteComponent(event) {
   if (event.key === "Delete") {
-    const activeObject = canvas.getActiveObject();
+    let activeObject = canvas.getActiveObject();
     if (activeObject) {
+      console.log('activeObject', activeObject)
       if (activeObject?.fabricImg) {
         canvas.remove(activeObject.fabricImg);
       }
+      if (activeObject?.newNetdisk) {
+        activeObject.newNetdisk.netdiskNewBox = null
+      }
       canvas.remove(activeObject);
       canvas.discardActiveObject();
+      activeObject = null
       canvas.renderAll();
     }
   }
@@ -115,6 +120,7 @@ function createTempAudio({
 // 截图
 async function exportImageFun() {
   var objects = canvas.getObjects();
+  objects = objects.filter(item => item.visible !== false);
   const handleVideos = document.querySelectorAll('.handle__video');
   // const handleNetdiskEl = document.querySelectorAll('.netdisk__el');
   const temoObj = [];
@@ -152,6 +158,9 @@ async function exportImageFun() {
     temoObj.push(newItem)
   }
   objects = canvas.getObjects();
+  objects = objects.filter(item => item.visible !== false);
+
+  console.log('objects', objects)
   var minX = objects[0].left;
   var minY = objects[0].top;
   var maxX = objects[0].left + objects[0].width;

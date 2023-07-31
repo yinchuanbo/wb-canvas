@@ -653,13 +653,14 @@ button {
   overflow-x: hidden;
   overflow-y: auto;
   user-select: none;
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #e0e2e2 0% 0% no-repeat padding-box;
-    border-radius: 4px;
-  }
+}
+
+.netdisk__el::-webkit-scrollbar {
+  width: 6px;
+}
+.netdisk__el::-webkit-scrollbar-thumb {
+  background: #e0e2e2 0% 0% no-repeat padding-box;
+  border-radius: 4px;
 }
 
 .netdisk__el .netdisk__el_item {

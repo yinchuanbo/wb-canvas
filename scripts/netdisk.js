@@ -118,7 +118,7 @@ class Netdisk {
         // 生成 dom
         let itemHtml = `<div class="netdisk__el_item">
           <div class="netdisk__item_img">
-            <img src="${imgObj.src}" />
+            <img src="${imgObj.src}" alt="" />
           </div>
           <div class="netdisk__item_name">${file.name}</div>
           <div class="netdisk__item_process">
@@ -134,50 +134,6 @@ class Netdisk {
     }
     reader.readAsDataURL(file);
   }
-  async createScreenshot() {
-    if (!this?.editDom || !this?.netdiskNewBox || this.newGroup) return;
-    const itemCanvas = await html2canvas(this.editDom, {
-      useCORS: true,
-      allowTaint: true,
-      taintTest: false,
-      scale: 1,
-    });
-    const itemCanvasImg = itemCanvas.toDataURL("image/png", 1.0);
-    if (this?.editDom) {
-      this.editDom.style.display = 'none';
-    }
-    fabric.Image.fromURL(itemCanvasImg, (img) => {
-      img.set({
-        left: 40,
-        top: 40
-      });
-      const top = this.netdiskNewBox.top;
-      const left = this.netdiskNewBox.left;
-      this.netdiskNewBox.visible = false;
-      const clonedRect = new fabric.Rect({
-        width: 518,
-        height: 363,
-        left: 0,
-        top: 0,
-        fill: "#fff",
-        rx: 8,
-        ry: 8,
-        stroke: "#b2b2b2",
-        strokeWidth: 2,
-        type: "netdisk"
-      });
-      this.newGroup = new fabric.Group([clonedRect, img], {
-        top,
-        left
-      });
-      canvas.add(this.newGroup);
-      this.newGroup.on('mousedown', () => {
-        this.newGroupSelected();
-        canvas.setActiveObject(this.netdiskNewBox)
-      })
-      canvas.renderAll()
-    })
-  }
   newGroupSelected() {
     const activeObject = canvas.getActiveObject();
     if (activeObject && activeObject === this.newGroup) {
@@ -189,6 +145,132 @@ class Netdisk {
         canvas.remove(this.newGroup);
         this.newGroup = null;
       }
+    }
+  }
+  async handleEditDom() {
+    if (this?.editDom) {
+      var scrollTop = this.editDom.scrollTop;
+      console.log(scrollTop);
+      const outerHTML = this.editDom.outerHTML;
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(outerHTML, "text/html");
+      var outerDiv = doc.querySelector("div");
+      outerDiv.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      var updatedHtmlString = outerDiv.outerHTML.replace(/<img([^>]+)>/g, '<img$1/>');
+      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='440' height='285'>
+        <style>
+          .netdisk__el {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 11px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            user-select: none;
+            background: #fff,
+          }
+          .netdisk__el::-webkit-scrollbar {
+            width: 6px;
+          }
+          .netdisk__el::-webkit-scrollbar-thumb {
+            background: #e0e2e2 0% 0% no-repeat padding-box;
+            border-radius: 4px;
+          }
+          .netdisk__el .netdisk__el_item {
+            width: 100px;
+            height: 100px;
+            padding: 10px 8px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+          }
+          .netdisk__el .netdisk__el_item .netdisk__item_img {
+            margin-bottom: 5px;
+          }
+          .netdisk__el .netdisk__el_item .netdisk__item_img img {
+            max-width: 100%;
+            max-height: 55px;
+            user-select: none;
+            -webkit-user-drag: none;
+          }
+          .netdisk__el .netdisk__el_item .netdisk__item_name {
+            font-size: 12px;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            width: 100%;
+          }
+        </style>
+        <foreignObject width='440' height='285'>
+          ${updatedHtmlString}
+        </foreignObject>
+      </svg>`;
+      var DOMURL = self.URL || self.webkitURL || self;
+      var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
+      var url = DOMURL.createObjectURL(svg);
+      const img = new Image()
+      img.onload = () => {
+        this.editDom.style.display = 'none';
+        this.netdiskNewBox.visible = false;
+        const svgImg = new fabric.Image(img, {
+          left: 40,
+          top: 40,
+          width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX - 80,
+          height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY - 80,
+          selectable: false
+        });
+        const clonedRect = new fabric.Rect({
+          width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX,
+          height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY,
+          left: 0,
+          top: 0,
+          fill: "#fff",
+          rx: 8,
+          ry: 8,
+          stroke: "#b2b2b2",
+          strokeWidth: 2,
+          type: "netdisk"
+        });
+        this.svgGroup = new fabric.Group([clonedRect, svgImg], {
+          top: this.netdiskNewBox.top,
+          left: this.netdiskNewBox.left
+        })
+        this.svgGroup.on('scaling', () => {
+          this.changeEditDom(this.svgGroup);
+          this.netdiskNewBox.set({
+            scaleX: this.svgGroup.scaleX,
+            scaleY: this.svgGroup.scaleY
+          })
+        })
+        this.svgGroup.on('moving', () => {
+          this.changeEditDom(this.svgGroup);
+          this.netdiskNewBox.set({
+            left: this.svgGroup.left,
+            top: this.svgGroup.top
+          })
+        })
+        canvas.add(this.svgGroup)
+        canvas.renderAll()
+        console.log('url', url)
+        // DOMURL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+  }
+  backToEdit() {
+    if (this?.svgGroup) {
+      canvas.remove(this.svgGroup)
+      this.svgGroup = null;
+    }
+    if (this?.editDom) {
+      this.editDom.style.display = 'grid'
+    }
+    if (this?.netdiskNewBox) {
+      this.netdiskNewBox.visible = true
+      canvas.setActiveObject(this.netdiskNewBox)
     }
   }
   changeCom() {
@@ -207,7 +289,8 @@ class Netdisk {
         ry: 8,
         stroke: "#b2b2b2",
         strokeWidth: 2,
-        type: "newNetdisk"
+        type: "newNetdisk",
+        newNetdisk: this
       }
     });
     canvas.add(this.netdiskNewBox);
@@ -226,28 +309,46 @@ class Netdisk {
     this.createEditDom();
     canvas.on("selection:updated", () => {
       const activeObject = canvas.getActiveObject();
-      // this.newGroupSelected();
-      // if (!(activeObject && activeObject === this.netdiskNewBox)) {
-      //   this.createScreenshot()
-      // }
+      const isNewBox = activeObject === this?.netdiskNewBox;
+      const isSvgGroup = activeObject === this?.svgGroup;
+      if (isNewBox) {
+        this.backToEdit()
+      } else {
+        if (this?.netdiskNewBox?.visible) {
+          this.handleEditDom()
+        }
+      }
+      if (isSvgGroup) {
+        this.backToEdit()
+      }
     });
     canvas.on("selection:created", () => {
-      // this.newGroupSelected();
-    });
-    canvas.on("selection:cleared", () => {
       const activeObject = canvas.getActiveObject();
-      // if (!activeObject || activeObject !== this.netdiskNewBox) {
-      //   this.createScreenshot()
-      // }
+      const isNewBox = activeObject === this?.netdiskNewBox;
+      const isSvgGroup = activeObject === this?.svgGroup;
+      if (isNewBox) {
+        this.backToEdit()
+      } else {
+        if (this?.netdiskNewBox?.visible) {
+          this.handleEditDom()
+        }
+      }
+      if (isSvgGroup) {
+        this.backToEdit()
+      }
+    });
+    canvas.on("selection:cleared", (e) => {
+      if (!this?.netdiskNewBox?.visible || !this?.netdiskNewBox) return;
+      this.handleEditDom()
     });
     canvas.renderAll();
   }
-  changeEditDom() {
+  changeEditDom(dom = this.netdiskNewBox) {
     if (this?.editDom) {
-      this.editDom.style.width = `${this.netdiskNewBox.width * this.netdiskNewBox.scaleX - 80}px`;
-      this.editDom.style.height = `${this.netdiskNewBox.height * this.netdiskNewBox.scaleY - 80}px`;
-      this.editDom.style.left = `${this.netdiskNewBox.left + 40}px`;
-      this.editDom.style.top = `${this.netdiskNewBox.top + 40}px`;
+      this.editDom.style.width = `${dom.width * dom.scaleX - 80}px`;
+      this.editDom.style.height = `${dom.height * dom.scaleY - 80}px`;
+      this.editDom.style.left = `${dom.left + 40}px`;
+      this.editDom.style.top = `${dom.top + 40}px`;
     }
   }
   createEditDom() {

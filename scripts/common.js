@@ -17,7 +17,7 @@ const $id = (selector = null) => {
 
 // 实例化 fabric 实例
 var canvas = new fabric.Canvas("myCanvas", {
-    preserveObjectStacking: true
+    preserveObjectStacking: false
 });
-
+var canvasCtx = canvas.getContext("2d");
 canvas.renderOnAddRemove = true;
