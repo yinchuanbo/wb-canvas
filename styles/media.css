@@ -676,7 +676,7 @@ button {
   position: relative;
 }
 .netdisk__el .netdisk__el_item + .netdisk__el_item {
-  margin-left: 13px;
+  margin-left: 10px;
 }
 
 .netdisk__el .netdisk__el_item:nth-child(4n - 3) {

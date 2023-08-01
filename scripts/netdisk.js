@@ -197,7 +197,7 @@ class Netdisk {
             position: relative;
           }
           .netdisk__el .netdisk__el_item + .netdisk__el_item {
-            margin-left: 13px;
+            margin-left: 10px;
           }
           .netdisk__el .netdisk__el_item:nth-child(4n - 3) {
             margin-left: 0;
@@ -255,7 +255,8 @@ class Netdisk {
         this.svgGroup = new fabric.Group([clonedRect, svgImg], {
           top: this.netdiskNewBox.top,
           left: this.netdiskNewBox.left,
-          crossOrigin: 'anonymous'
+          crossOrigin: 'anonymous',
+          type: 'svgGroup'
         });
         this.svgGroup.on("scaling", () => {
           this.changeEditDom(this.svgGroup);
@@ -356,9 +357,15 @@ class Netdisk {
     canvas.renderAll();
   }
   changeEditDom(dom = this.netdiskNewBox) {
+    let width = dom.width * dom.scaleX - 80;
+    let height = dom.height * dom.scaleY - 80;
+    if (dom?.type === 'svgGroup') {
+      width -= 2;
+      height -= 2;
+    }
     if (this?.editDom) {
-      this.editDom.style.width = `${dom.width * dom.scaleX - 80}px`;
-      this.editDom.style.height = `${dom.height * dom.scaleY - 80}px`;
+      this.editDom.style.width = `${width}px`;
+      this.editDom.style.height = `${height}px`;
       this.editDom.style.left = `${dom.left + 40}px`;
       this.editDom.style.top = `${dom.top + 40}px`;
     }
