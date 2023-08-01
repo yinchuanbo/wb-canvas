@@ -344,7 +344,7 @@ function generateRandomString(length) {
 function blobToBase64(blob) {
   var reader = new FileReader();
   reader.readAsDataURL(blob);
-  reader.onloadend = function() {
+  reader.onloadend = function () {
     var base64String = reader.result;
     console.log(base64String);
   };

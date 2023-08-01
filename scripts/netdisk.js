@@ -115,6 +115,27 @@ class Netdisk {
     });
     canvas.renderAll();
   }
+  handleImg({
+    src,
+    name
+  }, type = '') {
+    let itemHtml = `<div class="netdisk__el_item">
+      <div class="netdisk__item_img">
+        <img src="${src}"/>
+      </div>
+      <div class="netdisk__item_name">${name}</div>
+      <div class="netdisk__item_process">
+        <div class="process__bar"></div>
+      </div>
+    </div>`;
+    itemHtml = html_to_element(itemHtml);
+    this.editDom.appendChild(itemHtml);
+    if (type === 'process') {
+      const processDom = qs(itemHtml, ".netdisk__item_process");
+      const processBar = qs(processDom, ".process__bar");
+      incrementValue(1500, processDom, processBar);
+    }
+  }
   handleFile(file) {
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -124,20 +145,7 @@ class Netdisk {
         if (!this?.netdiskNewBox) {
           this.changeCom();
         }
-        let itemHtml = `<div class="netdisk__el_item">
-          <div class="netdisk__item_img">
-            <img src="${imgObj.src}" crossOrigin="anonymous" />
-          </div>
-          <div class="netdisk__item_name">${file.name}</div>
-          <div class="netdisk__item_process">
-            <div class="process__bar"></div>
-          </div>
-        </div>`;
-        itemHtml = html_to_element(itemHtml);
-        this.editDom.appendChild(itemHtml);
-        const processDom = qs(itemHtml, ".netdisk__item_process");
-        const processBar = qs(processDom, ".process__bar");
-        incrementValue(1500, processDom, processBar);
+        this.handleImg({ src: imgObj.src, name: file.name }, 'process')
       };
     };
     reader.readAsDataURL(file);
@@ -164,11 +172,13 @@ class Netdisk {
         /<img([^>]+)>/g,
         "<img$1/>"
       );
-      const curWidth = this.netdiskNewBox.width * this.netdiskNewBox.scaleX;
+      let curWidth = this.netdiskNewBox.width * this.netdiskNewBox.scaleX;
       const curHeight = this.netdiskNewBox.height * this.netdiskNewBox.scaleY;
-      const classnameTemp = generateRandomString(32);
-      var distop = this.editDom.scrollTop;
-      const data = `<svg xmlns='http://www.w3.org/2000/svg' crossorigin='anonymous' width='${curWidth}' height='${curHeight}' class="${classnameTemp}" data-top="${distop}">
+      const scrollPosition = parseFloat(this.editDom.scrollTop);
+      const scrollHeight = this.editDom.scrollHeight;
+      const offsetHeight = this.editDom.offsetHeight;
+      const isHasScrollBar = scrollHeight > offsetHeight;
+      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='${curWidth}' height='${curHeight}' style="font-family:hack;position: relative;">
         <style>
           .netdisk__el {
             display: flex;
@@ -176,13 +186,13 @@ class Netdisk {
             overflow-x: hidden;
             overflow-y: auto;
             user-select: none;
-            background: #fff
+            height: ${curHeight - 80 + scrollPosition}px!important;
           }
           .netdisk__el::-webkit-scrollbar {
             width: 6px;
           }
           .netdisk__el::-webkit-scrollbar-thumb {
-            background: #e0e2e2 0% 0% no-repeat padding-box;
+            background: transparent;
             border-radius: 4px;
           }
           .netdisk__el .netdisk__el_item {
@@ -202,6 +212,29 @@ class Netdisk {
           .netdisk__el .netdisk__el_item:nth-child(4n - 3) {
             margin-left: 0;
           }
+          .netdisk__el .netdisk__el_item .netdisk__item_process {
+            position: absolute;
+            left: 0;
+            bottom: 5px;
+            width: calc(100% - 16px);
+            height: 4px;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+            margin-left: 8px;
+          }
+          .netdisk__el .netdisk__el_item .netdisk__item_process .process__bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background-color: #1967d2;
+            border-radius: 4px;
+          }
+          .netdisk__el .netdisk__el_item:hover {
+            background-color: #f2f2f2;
+            border-radius: 5px;
+          }
           .netdisk__el .netdisk__el_item .netdisk__item_img {
             margin-bottom: 5px;
           }
@@ -218,30 +251,40 @@ class Netdisk {
             white-space: nowrap;
             text-overflow: ellipsis;
             width: 100%;
+            transform: translateZ(0);
           }
         </style>
-        <foreignObject width='${curWidth}' height='${curHeight}'>
+        <foreignObject width='${curWidth}' height='${curHeight + scrollPosition}' y='-${scrollPosition}'>
           ${outerHTML}
         </foreignObject>
       </svg>`;
+
+
+      // // 获取临时 url
+      // var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
+      // var urlTemp = URL.createObjectURL(svg);
+      // console.log('urlTemp', urlTemp)
+
+
+
       var url = `data:image/svg+xml;charset=utf-8,${data}`;
       url = url.replace(/\n/g, '').replace(/\t/g, '').replace(/#/g, '%23');
       const img = new Image();
-      img.setAttribute('crossOrigin', 'anonymous')
       img.src = url;
       img.onload = () => {
         this.editDom.style.display = "none";
         this.netdiskNewBox.visible = false;
+        const wrapperW = this.netdiskNewBox.width * this.netdiskNewBox.scaleX;
+        const wrapperH = this.netdiskNewBox.height * this.netdiskNewBox.scaleY;
         const svgImg = new fabric.Image(img, {
+          width: wrapperW - 80,
+          height: wrapperH - 80,
           left: 40,
-          top: 40,
-          width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX - 80,
-          height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY - 80,
-          crossOrigin: 'anonymous'
+          top: 40
         });
         const clonedRect = new fabric.Rect({
-          width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX,
-          height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY,
+          width: wrapperW,
+          height: wrapperH,
           left: 0,
           top: 0,
           fill: "#fff",
@@ -250,12 +293,23 @@ class Netdisk {
           stroke: "#b2b2b2",
           strokeWidth: 2,
           type: "netdisk",
-          crossOrigin: 'anonymous'
         });
-        this.svgGroup = new fabric.Group([clonedRect, svgImg], {
+        const scrollbarRect = new fabric.Rect({
+          width: 6,
+          height: 100,
+          left: wrapperW - 40 - 6,
+          top: scrollPosition + 50,
+          fill: "#e0e2e2",
+          rx: 4,
+          ry: 4
+        });
+        let groupArr = [clonedRect, svgImg];
+        if (isHasScrollBar) {
+          groupArr = [clonedRect, svgImg, scrollbarRect];
+        }
+        this.svgGroup = new fabric.Group(groupArr, {
           top: this.netdiskNewBox.top,
           left: this.netdiskNewBox.left,
-          crossOrigin: 'anonymous',
           type: 'svgGroup'
         });
         this.svgGroup.on("scaling", () => {
@@ -292,7 +346,6 @@ class Netdisk {
           }
         });
         canvas.add(this.svgGroup);
-        // DOMURL.revokeObjectURL(url);
         canvas.renderAll();
       };
 
@@ -359,6 +412,8 @@ class Netdisk {
   changeEditDom(dom = this.netdiskNewBox) {
     let width = dom.width * dom.scaleX - 80;
     let height = dom.height * dom.scaleY - 80;
+    let left = dom.left + 40;
+    let top = dom.top + 40;
     if (dom?.type === 'svgGroup') {
       width -= 2;
       height -= 2;
@@ -366,8 +421,8 @@ class Netdisk {
     if (this?.editDom) {
       this.editDom.style.width = `${width}px`;
       this.editDom.style.height = `${height}px`;
-      this.editDom.style.left = `${dom.left + 40}px`;
-      this.editDom.style.top = `${dom.top + 40}px`;
+      this.editDom.style.left = `${left}px`;
+      this.editDom.style.top = `${top}px`;
     }
   }
   createEditDom() {
@@ -393,7 +448,6 @@ class Netdisk {
       const initialY = event.clientY;
       let left = this.netdiskNewBox.left,
         top = this.netdiskNewBox.top;
-      console.log("111-2");
       canvas.setActiveObject(this.netdiskNewBox);
       canvas.renderAll();
       const handlePointerMove = (event) => {

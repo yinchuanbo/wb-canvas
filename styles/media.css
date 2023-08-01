@@ -6,7 +6,7 @@
 html,
 body {
   height: 100%;
-  /* font-family: hack; */
+  font-family: hack;
 }
 
 .container {
@@ -726,4 +726,5 @@ button {
   white-space: nowrap;
   text-overflow: ellipsis;
   width: 100%;
+  transform: translateZ(0);
 }
