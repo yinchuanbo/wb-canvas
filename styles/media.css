@@ -647,9 +647,10 @@ button {
 
 .netdisk__el {
   position: absolute;
-  display: grid;
-  grid-template-columns: repeat(4, 100px);
-  grid-gap: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  /* grid-template-columns: repeat(4, 100px);
+  grid-gap: 11px; */
   overflow-x: hidden;
   overflow-y: auto;
   user-select: none;
@@ -673,6 +674,13 @@ button {
   align-items: center;
   justify-content: center;
   position: relative;
+}
+.netdisk__el .netdisk__el_item + .netdisk__el_item {
+  margin-left: 13px;
+}
+
+.netdisk__el .netdisk__el_item:nth-child(4n - 3) {
+  margin-left: 0;
 }
 
 .netdisk__el .netdisk__el_item .netdisk__item_process {

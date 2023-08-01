@@ -147,7 +147,7 @@ class Netdisk {
     if (activeObject && activeObject === this.newGroup) {
       this.netdiskNewBox.visible = true;
       if (this?.editDom) {
-        this.editDom.style.display = "grid";
+        this.editDom.style.display = "flex";
       }
       if (this?.newGroup) {
         canvas.remove(this.newGroup);
@@ -164,16 +164,15 @@ class Netdisk {
         /<img([^>]+)>/g,
         "<img$1/>"
       );
-      const curWidth = this.netdiskNewBox.width * this.netdiskNewBox.scaleX + 3;
+      const curWidth = this.netdiskNewBox.width * this.netdiskNewBox.scaleX;
       const curHeight = this.netdiskNewBox.height * this.netdiskNewBox.scaleY;
       const classnameTemp = generateRandomString(32);
       var distop = this.editDom.scrollTop;
       const data = `<svg xmlns='http://www.w3.org/2000/svg' crossorigin='anonymous' width='${curWidth}' height='${curHeight}' class="${classnameTemp}" data-top="${distop}">
         <style>
           .netdisk__el {
-            display: grid;
-            grid-template-columns: repeat(4, 100px);
-            grid-gap: 11px;
+            display: flex;
+            flex-wrap: wrap;
             overflow-x: hidden;
             overflow-y: auto;
             user-select: none;
@@ -196,6 +195,12 @@ class Netdisk {
             align-items: center;
             justify-content: center;
             position: relative;
+          }
+          .netdisk__el .netdisk__el_item + .netdisk__el_item {
+            margin-left: 13px;
+          }
+          .netdisk__el .netdisk__el_item:nth-child(4n - 3) {
+            margin-left: 0;
           }
           .netdisk__el .netdisk__el_item .netdisk__item_img {
             margin-bottom: 5px;
@@ -278,7 +283,7 @@ class Netdisk {
             this.svgGroup = null;
           }
           if (this?.editDom) {
-            this.editDom.style.display = "grid";
+            this.editDom.style.display = "flex";
           }
           if (this?.netdiskNewBox) {
             this.netdiskNewBox.visible = true;
