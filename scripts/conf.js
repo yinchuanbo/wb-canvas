@@ -4,6 +4,7 @@ let INIT_SCALE = '100%'
 // canvas.centeredScaling = true;
 fabric.Object.prototype.transparentCorners = false;
 fabric.Object.prototype.cornerColor = "#1967d2";
+fabric.Object.prototype.crossOrigin = 'anonymous';
 fabric.Object.prototype.set({
     cornerSize: 10,
     borderColor: '#1967d2'

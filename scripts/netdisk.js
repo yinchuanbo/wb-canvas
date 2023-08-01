@@ -164,9 +164,11 @@ class Netdisk {
         /<img([^>]+)>/g,
         "<img$1/>"
       );
+      const curWidth = this.netdiskNewBox.width * this.netdiskNewBox.scaleX + 3;
+      const curHeight = this.netdiskNewBox.height * this.netdiskNewBox.scaleY;
       const classnameTemp = generateRandomString(32);
       var distop = this.editDom.scrollTop;
-      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='440' height='285' class="${classnameTemp}" data-top="${distop}">
+      const data = `<svg xmlns='http://www.w3.org/2000/svg' crossorigin='anonymous' width='${curWidth}' height='${curHeight}' class="${classnameTemp}" data-top="${distop}">
         <style>
           .netdisk__el {
             display: grid;
@@ -213,23 +215,16 @@ class Netdisk {
             width: 100%;
           }
         </style>
-        <foreignObject width='440' height='285'>
+        <foreignObject width='${curWidth}' height='${curHeight}'>
           ${outerHTML}
         </foreignObject>
-        <script>
-          const svgDom = document.querySelector(".${classnameTemp}");
-          const disTop = svgDom.dataset.top;
-          const netdiskEl = svgDom.querySelector(".netdisk__el");
-          netdiskEl.scrollTop = disTop;
-        </script>
       </svg>`;
-      var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
-      var url = URL.createObjectURL(svg);
+      var url = `data:image/svg+xml;charset=utf-8,${data}`;
+      url = url.replace(/\n/g, '').replace(/\t/g, '').replace(/#/g, '%23');
       const img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous')
       img.src = url;
-      img.setAttribute('crossorigin', 'anonymous')
       img.onload = () => {
-        console.log('img', img)
         this.editDom.style.display = "none";
         this.netdiskNewBox.visible = false;
         const svgImg = new fabric.Image(img, {
@@ -237,7 +232,7 @@ class Netdisk {
           top: 40,
           width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX - 80,
           height: this.netdiskNewBox.height * this.netdiskNewBox.scaleY - 80,
-          crossOrigin: "anonymous"
+          crossOrigin: 'anonymous'
         });
         const clonedRect = new fabric.Rect({
           width: this.netdiskNewBox.width * this.netdiskNewBox.scaleX,
@@ -250,11 +245,12 @@ class Netdisk {
           stroke: "#b2b2b2",
           strokeWidth: 2,
           type: "netdisk",
+          crossOrigin: 'anonymous'
         });
         this.svgGroup = new fabric.Group([clonedRect, svgImg], {
           top: this.netdiskNewBox.top,
           left: this.netdiskNewBox.left,
-          crossOrigin: "anonymous"
+          crossOrigin: 'anonymous'
         });
         this.svgGroup.on("scaling", () => {
           this.changeEditDom(this.svgGroup);
@@ -286,16 +282,14 @@ class Netdisk {
           }
           if (this?.netdiskNewBox) {
             this.netdiskNewBox.visible = true;
-            console.log("111-3");
             canvas.setActiveObject(this.netdiskNewBox);
           }
         });
-        console.log("url", url);
         canvas.add(this.svgGroup);
         // DOMURL.revokeObjectURL(url);
         canvas.renderAll();
       };
-      
+
     }
   }
   changeCom() {
