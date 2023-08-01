@@ -258,15 +258,6 @@ class Netdisk {
           ${outerHTML}
         </foreignObject>
       </svg>`;
-
-
-      // // 获取临时 url
-      // var svg = new Blob([data], { type: "image/svg+xml;charset=utf-8" });
-      // var urlTemp = URL.createObjectURL(svg);
-      // console.log('urlTemp', urlTemp)
-
-
-
       var url = `data:image/svg+xml;charset=utf-8,${data}`;
       url = url.replace(/\n/g, '').replace(/\t/g, '').replace(/#/g, '%23');
       const img = new Image();
@@ -296,9 +287,9 @@ class Netdisk {
         });
         const scrollbarRect = new fabric.Rect({
           width: 6,
-          height: 100,
-          left: wrapperW - 40 - 6,
-          top: scrollPosition + 50,
+          height: offsetHeight / scrollHeight * offsetHeight,
+          left: wrapperW - 40 - 6 - 0.5,
+          top: (offsetHeight - (offsetHeight / scrollHeight * offsetHeight)) * (scrollPosition / (scrollHeight - offsetHeight)) + 40 - 0.5,
           fill: "#e0e2e2",
           rx: 4,
           ry: 4
