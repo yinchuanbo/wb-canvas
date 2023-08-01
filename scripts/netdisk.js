@@ -127,9 +127,26 @@ class Netdisk {
       <div class="netdisk__item_process">
         <div class="process__bar"></div>
       </div>
+      <div class="netdisk__tool">
+        <button type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+            <defs>
+              <clipPath id="clip-path">
+                <rect id="矩形_3667" data-name="矩形 3667" width="24" height="24" transform="translate(870 406)" fill="#c8dcff" opacity="0"/>
+              </clipPath>
+            </defs>
+            <g id="btn_toolbar_delete_normal" transform="translate(-870 -406)" clip-path="url(#clip-path)">
+              <path id="路径_2028" data-name="路径 2028" d="M14.556,1045.556v-.711a4.432,4.432,0,0,0-.194-1.876,1.791,1.791,0,0,0-.777-.773,4.379,4.379,0,0,0-1.874-.2H10.289a4.379,4.379,0,0,0-1.874.2,1.791,1.791,0,0,0-.777.773,4.432,4.432,0,0,0-.194,1.876v.711m1.778,4.889v4.444m3.556-4.444v4.444M3,1045.556H19m-1.778,0v9.956a6.612,6.612,0,0,1-.291,2.809,2.605,2.605,0,0,1-1.165,1.164,6.568,6.568,0,0,1-2.811.293H9.044a6.568,6.568,0,0,1-2.811-.293,2.606,2.606,0,0,1-1.165-1.164,6.612,6.612,0,0,1-.291-2.809v-9.956" transform="translate(871 -632.798)" fill="none" stroke="#202124" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </g>
+          </svg>
+        </button>
+      </div>
     </div>`;
     itemHtml = html_to_element(itemHtml);
     this.editDom.appendChild(itemHtml);
+    qs(itemHtml, ".netdisk__tool").onclick = () => {
+      itemHtml.remove()
+    }
     if (type === 'process') {
       const processDom = qs(itemHtml, ".netdisk__item_process");
       const processBar = qs(processDom, ".process__bar");
@@ -205,6 +222,9 @@ class Netdisk {
             align-items: center;
             justify-content: center;
             position: relative;
+          }
+          .netdisk__el .netdisk__el_item .netdisk__tool {
+            display: none;
           }
           .netdisk__el .netdisk__el_item + .netdisk__el_item {
             margin-left: 10px;
