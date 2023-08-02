@@ -16,7 +16,8 @@ function showToolBar() {
   if (
     selectedObject.type === "netdiskGroup" ||
     selectedObject.type === "newNetdisk" ||
-    selectedObject.type === "frame"
+    selectedObject.type === "frame" ||
+    selectedObject.type === "coda"
   ) {
 
     if (selectedObject.type !== "frame") {
