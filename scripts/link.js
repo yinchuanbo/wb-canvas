@@ -195,6 +195,99 @@ class SpotifyLink {
 		this.init()
 	}
 	init() {
-		console.log('data', data)
+		this.setSpotifyCom()
+	}
+	async setSpotifyCom() {
+		const { title, html, width, height } = await this.getSpotifyData();
+		const background = new fabric.Rect({
+			width: width + 14 + 14,
+			height: height + 14 + 40,
+			fill: "#fff",
+			shadow: {
+				color: "rgba(0, 0, 0, 0.2)",
+				offsetX: 0,
+				offsetY: 3,
+				blur: 6,
+			},
+			rx: 8,
+			ry: 8,
+			type: "frame"
+		});
+		const spotifyLogo = new fabric.Image(qs(document, '#spotifyLogo'), {
+			width: 32,
+			height: 32,
+			top: 4,
+			left: 14,
+		})
+		this.frameHtml = html;
+		const spotifyTitle = new fabric.Text(title, {
+			left: 51,
+			top: 13,
+			fill: "#464646",
+			fontSize: 14,
+			fontFamily: "Arial",
+		});
+		this.group = new fabric.Group([background, spotifyLogo, spotifyTitle], {
+			type: 'frame'
+		});
+		canvas.add(this.group);
+		canvas.centerObject(this.group);
+		this.setSpotifyDom();
+		this.group.setControlsVisibility({
+			tl: false,
+			tr: false,
+			br: false,
+			bl: false,
+			ml: false,
+			mt: false,
+			mr: false,
+			mb: false,
+			mtr: false,
+		});
+		this.group.on("moving", () => {
+			this.changeSpotifyDom();
+		});
+		this.group.on("removed", () => {
+			if (this.spotifyDom) {
+				this.spotifyDom.remove();
+			}
+		});
+		canvas.renderAll()
+	}
+	getSpotifyData() {
+		return new Promise((resolve, reject) => {
+			const fetchUrl = `https://open.spotify.com/oembed?url=${this.url ?? ''}&format=json`;
+			fetch(fetchUrl)
+				.then(res => res.json())
+				.then(rel => {
+					resolve(rel);
+				})
+				.catch(error => {
+					reject(error);
+				});
+		});
+	}
+	setSpotifyDom() {
+		const { width, height, top, left, scaleX, scaleY } = this.group;
+		const curW = scaleX * width;
+		const curH = scaleY * height;
+		let html = `
+		  <div class="spotify__el" style="width: ${curW - 14 - 14}px;height: ${curH - 14 - 40}px;top: ${top + 40}px;left: ${left + 14}px;">
+			 ${this.frameHtml}
+			</div>
+		`;
+		this.spotifyDom = html_to_element(html);
+		qs(document, '.container').appendChild(this.spotifyDom);
+	}
+	changeSpotifyDom() {
+		if (this?.spotifyDom) {
+			const { width, height, top, left, scaleX, scaleY } = this.group;
+			const curW = scaleX * width;
+			const curH = scaleY * height;
+			this.spotifyDom.style.top = `${top + 40}px`;
+			this.spotifyDom.style.left = `${left + 14}px`;
+			this.spotifyDom.style.width = `${curW - 14 - 14}px`;
+			this.spotifyDom.style.height = `${curH - 14 - 40}px`;
+		}
 	}
 }

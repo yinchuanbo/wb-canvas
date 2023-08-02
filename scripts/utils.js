@@ -18,7 +18,10 @@ function showToolBar() {
     selectedObject.type === "newNetdisk" ||
     selectedObject.type === "frame"
   ) {
-    setControlsVisibility(selectedObject);
+
+    if (selectedObject.type !== "frame") {
+      setControlsVisibility(selectedObject);
+    }
     return;
   }
   if (selectedObject.type === "cropBox" || selectedObject.type === "circle") {
