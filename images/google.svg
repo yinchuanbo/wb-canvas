@@ -1,0 +1,19 @@
+<svg id="icon_link_google" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="矩形_3562" data-name="矩形 3562" width="32" height="32" transform="translate(909 704.856)" fill="#fff" stroke="#707070" stroke-width="1"/>
+    </clipPath>
+  </defs>
+  <g id="icon_link_google-2" data-name="icon_link_google" transform="translate(-909 -704.856)" clip-path="url(#clip-path)">
+    <g id="组_5799" data-name="组 5799" transform="translate(914 709.856)">
+      <g id="组_5798" data-name="组 5798" transform="translate(0 0)">
+        <path id="路径_22006" data-name="路径 22006" d="M5.229,106.849a5.657,5.657,0,0,1,.834-2.958v-3.675H2.3a10.71,10.71,0,0,0,0,13.267H6.062v-3.675A5.657,5.657,0,0,1,5.229,106.849Z" transform="translate(0 -95.849)" fill="#fbbd00"/>
+        <path id="路径_22007" data-name="路径 22007" d="M198.614,373.791,196,376.4l2.614,2.614a11.07,11.07,0,0,0,6.788-2.3v-3.757h-3.757A5.925,5.925,0,0,1,198.614,373.791Z" transform="translate(-187.664 -357.019)" fill="#0f9d58"/>
+        <path id="路径_22008" data-name="路径 22008" d="M56.584,325.477l-3.761,3.761a11.337,11.337,0,0,0,.965,1.1,11.081,11.081,0,0,0,7.887,3.267v-5.229A5.928,5.928,0,0,1,56.584,325.477Z" transform="translate(-50.521 -311.604)" fill="#31aa52"/>
+        <path id="路径_22009" data-name="路径 22009" d="M267.154,199.881a11.252,11.252,0,0,0-.183-2.021l-.1-.536H256v5.229h5.292a5.9,5.9,0,0,1-2.261,2.424l3.757,3.757a11.324,11.324,0,0,0,1.1-.965A11.081,11.081,0,0,0,267.154,199.881Z" transform="translate(-245.154 -189.035)" fill="#3c79e6"/>
+        <path id="路径_22010" data-name="路径 22010" d="M202.8,6.964l.462.462,3.7-3.7-.462-.462A11.081,11.081,0,0,0,198.614,0L196,2.614l2.614,2.614A5.887,5.887,0,0,1,202.8,6.964Z" transform="translate(-187.769 0)" fill="#cf2d48"/>
+        <path id="路径_22011" data-name="路径 22011" d="M61.675,5.229V0a11.082,11.082,0,0,0-7.887,3.267,11.322,11.322,0,0,0-.965,1.1l3.761,3.761a5.928,5.928,0,0,1,5.092-2.9Z" transform="translate(-50.52 0)" fill="#eb4132"/>
+      </g>
+    </g>
+  </g>
+</svg>

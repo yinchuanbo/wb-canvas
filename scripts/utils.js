@@ -15,7 +15,8 @@ function showToolBar() {
   let dis = null;
   if (
     selectedObject.type === "netdiskGroup" ||
-    selectedObject.type === "newNetdisk"
+    selectedObject.type === "newNetdisk" ||
+    selectedObject.type === "frame"
   ) {
     setControlsVisibility(selectedObject);
     return;
@@ -60,7 +61,6 @@ function deleteComponent(event) {
   if (event.key === "Delete") {
     let activeObject = canvas.getActiveObject();
     if (activeObject) {
-      console.log("activeObject", activeObject);
       if (activeObject?.fabricImg) {
         canvas.remove(activeObject.fabricImg);
       }
@@ -348,4 +348,54 @@ function blobToBase64(blob) {
     var base64String = reader.result;
     console.log(base64String);
   };
+}
+
+function linkFun(e) {
+  const hasLinkInput = e.target.closest('.link__input') !== null;
+  if (hasLinkInput) return;
+  this.classList.toggle('active')
+}
+
+function xhrequest(url) {
+  return new Promise((resolve, reject) => {
+    let DownUrl = url;
+    fetch(DownUrl)
+      .then(response => response.blob())
+      .then(res => {
+        let blod = new Blob([res]);
+        resolve(blod);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+function isYoutubeUrl(url) {
+  var reg =
+    /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts))((.|-){11})(?:\S+)?$/;
+  return reg.test(url);
+}
+
+function isVimeoUrl(url) {
+  var reg = /^https?:\/\/(www\.)?vimeo\.com\/([0-9]+)/;
+  return reg.test(url);
+}
+
+function isGoogleDocsUrl(url) {
+  var reg =
+    /^https?:\/\/docs\.google\.com\/(document|presentation|spreadsheets)\/d\/([a-zA-Z0-9\-_]+)/;
+  return reg.test(url);
+}
+// Meet-Coda
+function isMeetCodaUrl(url) {
+  var reg =
+    /^https?:\/\/coda\.io\/d\/(Meet-Coda_dfFgmufwT_V|Copy-of-Meet-Coda_dUAl_s3HCfl|([a-zA-Z0-9\-_]+))\/([a-zA-Z0-9\-_#]+)/;
+  return reg.test(url);
+}
+
+function isSpotifyUrl(url) {
+  var reg =
+    /^https?:\/\/open\.spotify\.com\/(track|episode|show|playlist|embed)\/.*/;
+  return reg.test(url);
 }

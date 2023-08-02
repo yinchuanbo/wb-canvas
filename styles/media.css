@@ -63,7 +63,7 @@ button {
 }
 
 .docker button + button {
-  margin-left: 10px;
+  margin-left: 5px;
 }
 
 #media:hover,
@@ -680,11 +680,10 @@ button {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 50px;
+  bottom: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
   background-color: #fff;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1607843137);
   border-radius: 5px;
@@ -696,8 +695,8 @@ button {
 }
 
 .netdisk__el .netdisk__el_item .netdisk__tool button {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -707,6 +706,7 @@ button {
 .netdisk__el .netdisk__el_item .netdisk__tool button:hover {
   background-color: aliceblue;
   cursor: pointer;
+  color: #1967d2;
 }
 
 .netdisk__el .netdisk__el_item + .netdisk__el_item {
@@ -761,4 +761,95 @@ button {
   text-overflow: ellipsis;
   width: 100%;
   transform: translateZ(0);
+}
+
+#link {
+  position: relative;
+}
+
+#link .link__input {
+  position: absolute;
+  width: 400px;
+  height: 190px;
+  background-color: #fff;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  bottom: calc(100% + 20px);
+  left: 50%;
+  margin-left: -200px;
+  display: none;
+  padding: 20px 24px 0 24px;
+  box-sizing: border-box;
+}
+
+.link__input_main {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+#link .link__input .support__item {
+  width: 100%;
+  text-align: left;
+}
+
+#link .link__input .support__item h2 {
+  font-size: 14px;
+  color: #606067;
+  margin-bottom: 10px;
+}
+
+#link.active .link__input {
+  border-radius: 5px;
+  cursor: default;
+  animation-duration: 0.5s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+#link.active .link__input .link__title {
+  font-size: 16px;
+  color: #464646;
+  margin-bottom: 10px;
+}
+#link.active .link__input input {
+  width: 266px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 2px solid #ddd;
+  outline: none;
+  border-radius: 5px;
+  font-size: 14px;
+  text-indent: 5px;
+}
+
+#link.active .link__input input:focus {
+  /* border-color: #1967d2 !important; */
+  border: 0;
+  box-shadow: 0 0 0 2px rgba(25, 103, 210, 1);
+}
+
+#link.active .link__input .addLink {
+  background-color: rgb(25, 103, 210);
+  color: #fff;
+  height: 36px;
+  padding: 0 25px;
+  line-height: 36px;
+  border-radius: 36px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#link.active .link__input .addLink:hover {
+  opacity: 0.7;
+}
+
+#link.active .link__input .addLink:active {
+  opacity: 0.8;
+}
+
+.youtube__el {
+  position: absolute;
 }
