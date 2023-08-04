@@ -201,7 +201,7 @@ class Netdisk {
       const scrollHeight = this.editDom.scrollHeight;
       const offsetHeight = this.editDom.offsetHeight;
       const isHasScrollBar = scrollHeight > offsetHeight;
-      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='${curWidth}' height='${curHeight}' style="font-family:hack;position: relative;">
+      const data = `<svg xmlns='http://www.w3.org/2000/svg' width='${curWidth}' height='${curHeight}'>
         <style>
           .netdisk__el {
             display: flex;

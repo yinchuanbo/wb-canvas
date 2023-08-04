@@ -12,17 +12,24 @@ function showToolBar() {
   var selectedObject = canvas.getActiveObject();
   if (!selectedObject) return;
   let boundingRect = selectedObject.getBoundingRect();
+  const type = selectedObject?.type || '';
   let dis = null;
-  if (
-    selectedObject.type === "netdiskGroup" ||
-    selectedObject.type === "newNetdisk" ||
-    selectedObject.type === "frame" ||
-    selectedObject.type === "coda"
-  ) {
-
-    if (selectedObject.type !== "frame") {
-      setControlsVisibility(selectedObject);
-    }
+  if (['youtube', 'netdiskGroup', 'newNetdisk', 'code'].includes(type)) {
+    setControlsVisibility(selectedObject);
+    return;
+  }
+  if (['spotify', 'coda'].includes(type)) {
+    setControlsVisibility(selectedObject, {
+      tl: false,
+      tr: false,
+      br: false,
+      bl: false,
+      ml: false,
+      mt: false,
+      mr: false,
+      mb: false,
+      mtr: false,
+    });
     return;
   }
   if (selectedObject.type === "cropBox" || selectedObject.type === "circle") {
@@ -256,18 +263,18 @@ function pencilFun() {
   // });
 }
 
-function setControlsVisibility(obj) {
-  obj?.setControlsVisibility?.({
-    tl: true,
-    tr: true,
-    br: true,
-    bl: true,
-    ml: false,
-    mt: false,
-    mr: false,
-    mb: false,
-    mtr: false,
-  });
+function setControlsVisibility(obj, val = {
+  tl: true,
+  tr: true,
+  br: true,
+  bl: true,
+  ml: false,
+  mt: false,
+  mr: false,
+  mb: false,
+  mtr: false,
+}) {
+  obj?.setControlsVisibility?.(val);
 }
 
 const qs = (dom, selector) => {
@@ -402,4 +409,60 @@ function isSpotifyUrl(url) {
   var reg =
     /^https?:\/\/open\.spotify\.com\/(track|episode|show|playlist|embed)\/.*/;
   return reg.test(url);
+}
+
+function cropImage(imageUrl, targetWidth, targetHeight) {
+  return new Promise((resolve, reject) => {
+    // Create a canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Create an image element
+    const image = new Image();
+
+    // Set the source of the image
+    image.src = imageUrl;
+
+    // When the image is loaded, perform the cropping
+    image.onload = function () {
+      // Set the canvas size to the desired target size
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      // Draw the image onto the canvas with the desired dimensions
+      ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+      // Get the cropped image as a data URL
+      const croppedImageDataURL = canvas.toDataURL('image/jpeg');
+
+      // Resolve the Promise with the cropped image data URL
+      resolve(croppedImageDataURL);
+    };
+
+    // If there's an error loading the image, reject the Promise
+    image.onerror = function () {
+      reject(new Error('Failed to load image'));
+    };
+  });
+}
+
+function fetchDataFromCoda(url, token) {
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  };
+  return fetch(url, options)
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+    })
+    .catch(error => {
+      console.error(error);
+    });
 }

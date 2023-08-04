@@ -6,7 +6,6 @@
 html,
 body {
   height: 100%;
-  font-family: hack;
 }
 
 .container {
@@ -773,7 +772,7 @@ button {
   height: 190px;
   background-color: #fff;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-  bottom: calc(100% + 20px);
+  bottom: calc(100% + 15px);
   left: 50%;
   margin-left: -200px;
   display: none;
@@ -856,8 +855,96 @@ button {
 
 .spotify__el {
   position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .coda__el {
   position: absolute;
+}
+
+.view__button {
+  width: 200px;
+  height: 40px;
+  background-color: #fff;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.view__button:hover {
+  opacity: 0.7;
+}
+
+.view__button:active {
+  opacity: 0.8;
+}
+
+.code__el {
+  position: absolute;
+  border-radius: 8px;
+}
+
+.code__el .CodeMirror {
+  min-height: 112px;
+}
+
+/* code */
+.CodeMirror {
+  font-size: 14px;
+  font-family: Roboto;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+.CodeMirror pre.CodeMirror-line {
+  line-height: 20px;
+  margin-right: 10px;
+}
+
+.CodeMirror-gutter {
+  width: 50px;
+}
+
+.cm-s-blackboard.CodeMirror,
+.cm-s-blackboard .CodeMirror-gutters {
+  border: 0 !important;
+}
+
+.CodeMirror-linenumber {
+  text-align: center !important;
+}
+
+.CodeMirror-gutters {
+  border: 0 !important;
+}
+
+.CodeMirror-scroll {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  margin-right: 0;
+}
+
+.CodeMirror-scroll .CodeMirror-sizer {
+  padding-top: 25px;
+  padding-bottom: 25px !important;
+}
+
+.codehightlight-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.CodeMirror-sizer {
+  border-right: 0;
+}
+
+.CodeMirror-lines {
+  padding: 0 !important;
 }
