@@ -466,3 +466,15 @@ function fetchDataFromCoda(url, token) {
       console.error(error);
     });
 }
+
+function getNodeContent(node) {
+  var content = '';
+  if (node.nodeType === Node.TEXT_NODE) {
+    content = node.textContent;
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    for (var i = 0; i < node.childNodes.length; i++) {
+      content += getNodeContent(node.childNodes[i]);
+    }
+  }
+  return content;
+}
