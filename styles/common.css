@@ -901,7 +901,7 @@ button {
 }
 
 .CodeMirror pre.CodeMirror-line {
-  line-height: 20px;
+  line-height: 18px;
   margin-right: 10px;
 }
 
@@ -947,4 +947,8 @@ button {
 
 .CodeMirror-lines {
   padding: 0 !important;
+}
+
+.CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
+  padding: 0!important;
 }

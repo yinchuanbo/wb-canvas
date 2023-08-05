@@ -1,6 +1,6 @@
-$id('code').onclick = () => {
-  new Code()
-}
+$id("code").onclick = () => {
+  new Code();
+};
 
 class Code {
   constructor() {
@@ -9,49 +9,62 @@ class Code {
     this.init();
   }
   init() {
-    this.createCodeBlock()
+    this.createCodeBlock();
   }
   createCodeBlock() {
     this.background = new fabric.Rect({
       width: this.width,
       height: this.height,
-      fill: '#282a36',
+      // fill: "#282a36",
+      fill: 'transparent',
       rx: 8,
       ry: 8,
-      type: 'code'
+      type: "code",
     });
     canvas.add(this.background);
     canvas.centerObject(this.background);
+    this.background.set({
+      left: this.background.left,
+      top: this.background.top
+    })
     this.setCodeDom();
-    this.background.on('scaling', () => {
+    this.background.on("scaling", () => {
       if (!this.backgroundTop) {
         this.backgroundTop = this.background.top;
       }
       if (this?.timer) {
-        clearTimeout(this.timer)
+        clearTimeout(this.timer);
         this.timer = null;
       }
       this.background.set({
         scaleY: 1,
-        top: this.backgroundTop
-      })
-      this.changeCodeDom()
-      this.timer = setTimeout((() => {
-        this.backgroundTop = null;
-      }).bind(this), 1000)
-    })
-    this.background.on('removed', () => {
-      this.codeDom?.remove?.()
-    })
+        top: this.backgroundTop,
+      });
+      this.changeCodeDom();
+      this.timer = setTimeout(
+        (() => {
+          this.backgroundTop = null;
+        }).bind(this),
+        1000
+      );
+    });
+    this.background.on("removed", () => {
+      this.codeDom?.remove?.();
+      if (this?.codeTemp) {
+        canvas.remove(this.codeTemp);
+        this.codeTemp = null;
+      }
+    });
     canvas.on("selection:updated", () => {
       const activeObject = canvas.getActiveObject();
       const isBackground = activeObject === this?.background;
       if (!isBackground) {
-        this.getEditorValue()
+        this.getEditorValue();
       }
     });
     canvas.on("selection:cleared", () => {
-      this.getEditorValue()
+      if (!this?.background?.visible || !this?.background) return;
+      this.getEditorValue();
     });
     canvas.renderAll();
   }
@@ -66,141 +79,190 @@ class Code {
     this.codeDom = html_to_element(html);
     qs(document, ".container").appendChild(this.codeDom);
     this.setDomMove();
-    this.initCodeMirror()
+    this.initCodeMirror();
   }
   initCodeMirror() {
-    this.editor = CodeMirror.fromTextArea(qs(this.codeDom, 'textarea'), {
+    this.editor = CodeMirror.fromTextArea(qs(this.codeDom, "textarea"), {
       lineNumbers: true,
       matchBrackets: true,
       continueComments: "Enter",
-      extraKeys: { "Ctrl-Q": "toggleComment" }
+      extraKeys: { "Ctrl-Q": "toggleComment" },
     });
-    this.editor.setOption('mode', 'javascript');
-    this.editor.setOption('theme', 'dracula');
+    this.editor.setOption("mode", "javascript");
+    this.editor.setOption("theme", "dracula");
     this.editor.on(
-      'change',
-      function (instance, obj) {
-        // console.log('instance', instance);
-        // console.log('obj', obj);
-        var codeHeight = qs(this.codeDom, '.CodeMirror').offsetHeight
-        this.background.set({ height: codeHeight > 112 ? codeHeight : 112 })
-        canvas.renderAll()
+      "change",
+      function () {
+        var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
+        this.background.set({ height: codeHeight > this.height ? codeHeight : this.height });
+        canvas.renderAll();
       }.bind(this)
     );
     this.editor.refresh();
   }
   getEditorValue() {
     const curVal = this.editor.getValue();
-    this.renderEditValueToCanvas(curVal)
+    this.renderEditValueToCanvas(curVal);
   }
-  getEveryChatColor() {
-    const CodeMirrorLines = qsAll(this.codeDom, '.CodeMirror-line');
-    const lineInfo = {};
-    if (CodeMirrorLines?.length) {
-      CodeMirrorLines.forEach((item, index) => {
-        const firstSpan = qs(item, 'span');
-        var json = Array.from(firstSpan.childNodes).map(function (node) {
-          var element = {
-            content: getNodeContent(node),
-            class: node.className
-          };
-          return element;
-        });
-        // json 是某一行的所有数据
-        lineInfo[index] = json;
-      })
+  getEveryCharColor() {
+    var lineCount = this.editor.lineCount();
+    var data = {};
+    for (var line = 0; line < lineCount; line++) {
+      var lineDataArrs = [];
+      var tokens = this.editor.getLineTokens(line);
+      for (var i = 0; i < tokens.length; i++) {
+        var token = tokens[i];
+        const str = token.string;
+        const tokenType = token.type;
+        for (let j = 0; j < str.length; j++) {
+          lineDataArrs.push({
+            char: str[j],
+            colorType: tokenType,
+          });
+        }
+      }
+      data[line] = this.handleLineData(lineDataArrs, line);
     }
-    console.log('lineInfo', lineInfo)
-    // var json = Array.from(tempDiv.childNodes).map(function(node) {
-    //   var element = {
-    //     content: getNodeContent(node),
-    //     class: node.className
-    //   };
-    //   return element;
-    // });
-
-
-
-    // var lineCount = this.editor.lineCount();
-    // for (var i = 0; i < lineCount; i++) {
-    //   var lineText = this.editor.getLine(i);
-    //   console.log("Line " + i + ": " + lineText);
-    //   var lineLength = lineText.length;
-    //   for (var j = 0; j < lineLength; j++) {
-    //     var token = this.editor.getTokenAt({ line: i, ch: j });
-    //     var color = token.className;
-    //     console.log("Color of char " + j + ": " + color);
-    //   }
-    // }
+    return data;
+  }
+  handleLineData(arr = []) {
+    var output = {};
+    for (var i = 0; i < arr.length; i++) {
+      var obj = arr[i];
+      var colorType = obj.colorType;
+      switch (colorType) {
+        case "keyword":
+          colorType = "#ff79c6";
+          break;
+        case "def":
+          colorType = "#50fa7b";
+          break;
+        case "comment":
+          colorType = "#6272a4";
+          break;
+        case "string":
+          colorType = "#f1fa8c";
+          break;
+        case "string-2":
+          colorType = "#f1fa8c";
+          break;
+        case "number":
+          colorType = "#bd93f9";
+          break;
+        case "variable":
+          colorType = "#50fa7b";
+          break;
+        case "variable-2":
+          colorType = "white";
+          break;
+        case "operator":
+          colorType = "#ff79c6";
+          break;
+        case "atom":
+          colorType = "#bd93f9";
+          break;
+        case "meta":
+          colorType = "#f8f8f2";
+          break;
+        case "tag":
+          colorType = "#ff79c6";
+          break;
+        case "attribute":
+          colorType = "#50fa7b";
+          break;
+        case "qualifier":
+          colorType = "#50fa7b";
+          break;
+        case "property":
+          colorType = "#66d9ef";
+          break;
+        case "builtin":
+          colorType = "#50fa7b";
+          break;
+        case "variable-3":
+          colorType = "#ffb86c";
+          break;
+        case "type":
+          colorType = "#ffb86c";
+          break;
+        default:
+          colorType = "#fff";
+          break;
+      }
+      output[i] = { fill: colorType };
+    }
+    return output;
   }
   renderEditValueToCanvas(val) {
     if (this?.codeTemp) return;
-    const { width, height, scaleX, scaleY, top, left } = this.background;
+    let { width, height, scaleX, scaleY, top, left } = this.background;
     const lineCount = this.editor.lineCount();
-    this.getEveryChatColor();
+    const charColors = this.getEveryCharColor();
     const editorTemp = new fabric.Textbox(val, {
       top: 25,
       width: width * scaleX - 51,
-      left: 51 + 4,
+      left: 51,
       fontSize: 14,
-      fontFamily: 'Roboto',
-      fill: 'white',
-      backgroundColor: 'transparent',
-      textAlign: 'left',
-      originX: 'left',
-      type: 'editorTemp',
-      lineHeight: 20 / 14 / 1.13,
-      noWrap: true
+      fontFamily: "Roboto",
+      backgroundColor: "transparent",
+      textAlign: "left",
+      originX: "left",
+      type: "editorTemp",
+      lineHeight: 16 / 14,
+      styles: charColors,
     });
     const newBg = new fabric.Rect({
-      width, height, scaleX, scaleY,
-      fill: '#282a36',
+      width,
+      height,
+      scaleX,
+      scaleY,
+      fill: "#282a36",
       rx: 8,
       ry: 8,
     });
     this.codeTemp = new fabric.Group([newBg, editorTemp], {
       top,
       left,
-      type: 'code'
-    })
+      // top: 200,
+      // left: 200,
+      type: "code",
+    });
     for (let i = 0; i < lineCount; i++) {
       let countText = new fabric.Text(`${i + 1}`, {
         left: this.codeTemp.left,
-        top: this.codeTemp.top + 25 + 20 * i,
+        top: this.codeTemp.top + 25 + 18 * i,
         fill: "#6d8a88",
-        fontFamily: 'Roboto',
+        fontFamily: "Roboto",
         fontSize: 14,
-        lineHeight: 20 / 14 / 1.13
       });
       countText.set({
-        left: this.codeTemp.left + (51 - countText.width) / 2
-      })
+        left: this.codeTemp.left + (51 - countText.width) / 2 + 1,
+      });
       this.codeTemp.addWithUpdate(countText);
     }
     canvas.add(this.codeTemp);
-    // 隐藏元素
     this.background.visible = false;
-    this.codeDom.style.display = 'none';
+    this.codeDom.style.display = "none";
     this.codeTemp.on("mousedown", () => {
       canvas.discardActiveObject();
     });
     this.codeTemp.on("mousemove", () => {
       canvas.discardActiveObject();
     });
-    this.codeTemp.on('mouseup', () => {
+    this.codeTemp.on("mouseup", () => {
       this.background.visible = true;
       this.background.set({
         top: this.codeTemp.top,
-        left: this.codeTemp.left
-      })
-      canvas.setActiveObject(this.background)
-      this.changeCodeDom()
-      this.codeDom.style.display = 'block';
-      canvas.remove(this.codeTemp)
-      this.codeTemp = null
-      this.editor.focus()
-    })
-    canvas.renderAll()
+        left: this.codeTemp.left,
+      });
+      canvas.setActiveObject(this.background);
+      this.changeCodeDom();
+      this.codeDom.style.display = "block";
+      canvas.remove(this.codeTemp);
+      this.codeTemp = null;
+      this.editor.focus();
+    });
+    canvas.renderAll();
   }
   setDomMove() {
     this.codeDom.onpointerdown = (event) => {
