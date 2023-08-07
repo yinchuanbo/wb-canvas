@@ -1020,6 +1020,8 @@ button {
   box-sizing: border-box;
   background-color: #fff;
   text-align: center;
+  display: flex;
+  align-items: center;
 }
 
 .pdf__main .main__sidebar .main__sidebar_item.active {
@@ -1038,3 +1040,41 @@ button {
   user-select: none;
   -webkit-user-drag: none;
 }
+
+/* start */
+/* .codeEl__temp {
+  position: absolute;
+  top: 200px;
+  left: 200px;
+  font-family: Roboto;
+  font-size: 14px;
+  padding-left: 51px;
+  padding-top: 25px;
+  box-sizing: border-box;
+  background-color: #282a36;
+  border-radius: 8px;
+}
+
+.codeEl__temp > div {
+  line-height: 18px;
+  min-height: 18px;
+  padding-right: 10px;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+  position: relative;
+  font-weight: normal;
+}
+
+.codeEl__temp > div > b {
+  position: absolute;
+  width: 43px;
+  height: 17px;
+  font-size: 14px;
+  color: #6d8a88;
+  left: -45px;
+  line-height: 17px;
+  text-align: center;
+  font-weight: normal;
+} */

@@ -37,7 +37,7 @@ class Pdf {
       stroke: "#d1d1d1",
       strokeWidth: 1,
       type: "pdf",
-      pdfBg: this
+      pdfBg: this,
     });
     canvas.add(this.pdfBg);
     canvas.centerObject(this.pdfBg);
@@ -157,7 +157,9 @@ class Pdf {
         background-color: #fff;
         text-align: center;
         position: relative;
-        top: -${scrollPosition}px
+        top: -${scrollPosition}px;
+        display: flex;
+        align-items: center;
       }
       .pdf__main .main__sidebar .main__sidebar_item.active {
         border-color: #2b7afc;
@@ -239,17 +241,13 @@ class Pdf {
     qs(this.pdfDom, ".main__sidebar").onclick = (e) => {
       const target = e.target;
       if (target.tagName === "IMG") {
-        const index = getIndex(target.parentNode);
         const mainSidebarItems = qsAll(this.pdfDom, ".main__sidebar_item");
-        const mainContentImgs = qsAll(this.pdfDom, ".main__content img");
+        const mainContentImg = qs(this.pdfDom, ".main__content img");
         mainSidebarItems.forEach((item) => {
           item.classList.remove("active");
         });
         target.parentNode.classList.add("active");
-        mainContentImgs.forEach((item) => {
-          item.style.display = "none";
-        });
-        mainContentImgs[index].style.display = "block";
+        mainContentImg.src = target.src;
       }
     };
   }
@@ -310,10 +308,12 @@ class Pdf {
                 const curImgHtml = `<img src="${imgData}" style="display: ${
                   curI === 1 ? "block" : "none"
                 } " data-index="${curI}"/>`;
-                qs(this.pdfDom, ".main__content").insertAdjacentHTML(
-                  "beforeend",
-                  curImgHtml
-                );
+
+                const mainContent = qs(this.pdfDom, ".main__content");
+                if (!mainContent?.children?.length) {
+                  mainContent.insertAdjacentHTML("beforeend", curImgHtml);
+                }
+
                 qs(this.pdfDom, ".main__sidebar").insertAdjacentHTML(
                   "beforeend",
                   `

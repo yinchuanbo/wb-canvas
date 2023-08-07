@@ -19,19 +19,38 @@ class Code {
       rx: 8,
       ry: 8,
       type: "code",
-      codeBg: this
+      codeBg: this,
     });
     canvas.add(this.codeBg);
     canvas.centerObject(this.codeBg);
     canvas.renderAll();
     this.setCodeEl();
     this.codeBg.on("scaling", () => {
+      if (!this.backgroundTop) {
+        this.backgroundTop = this.codeBg.top;
+      }
+      if (this?.timer) {
+        clearTimeout(this.timer);
+        this.timer = null;
+      }
+      // var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
+      this.codeBg.set({
+        scaleY: 1,
+        top: this.backgroundTop,
+        // height: codeHeight
+      });
       this.setCodeDomStyles();
+      this.timer = setTimeout(
+        (() => {
+          this.backgroundTop = null;
+        }).bind(this),
+        1000
+      );
     });
     this.codeBg.on("removed", () => {
       this.codeDom?.remove?.();
       if (this?.svgGroup) {
-        canvas.remove(this.svgGroup)
+        canvas.remove(this.svgGroup);
         this.svgGroup = null;
       }
     });
@@ -49,97 +68,113 @@ class Code {
   }
   async setCloneCodeBg() {
     var lineCount = this.editor.lineCount();
-    var allStr = ''
+    var allStr = "";
     for (var line = 0; line < lineCount; line++) {
       var tokens = this.editor.getLineTokens(line);
-      var lineStr = '';
+      var lineStr = "";
       for (var i = 0; i < tokens.length; i++) {
         var { string, type } = tokens[i];
         if (type) {
           lineStr += `<span class="${type}">${string}</span>`;
         } else {
-          lineStr += `${string}`
+          lineStr += `${string}`;
         }
       }
-      allStr += `<p>${lineStr}</p>`
+      allStr += `<div><b>${line + 1}</b>${lineStr}</div>`;
     }
-    this.createTempDom(allStr)
+    this.createTempAllDom(allStr);
   }
-  createTempDom(str = '') {
-    const { width, scaleX } = this.codeBg;
-    const curW = scaleX * width - 51 - 10;
-    var curH = qs(this.codeDom, ".CodeMirror").offsetHeight;
-    curH = curH > 112 ? curH : 112;
-    let html = `
-    <div class="code__el_temp" xmlns="http://www.w3.org/1999/xhtml">
-      ${str}
+  createTempAllDom(allStr) {
+    const { width, height, left, top } = this.codeBg;
+    let html = `<div class="codeEl__temp" style="width: ${width}px; height: ${height}px" xmlns="http://www.w3.org/1999/xhtml">
+      ${allStr}
     </div>`;
-    this.setCodeTempSvg(html, curW, curH)
+    this.genSvg(html, width, height, left, top);
   }
-  setCodeTempSvg(html, curW, curH) {
-    const { top, left } = this.codeBg;
-    curH = curH - 50;
-    const data = `<svg xmlns='http://www.w3.org/2000/svg' width="${curW}" height="${curH}">
+  genSvg(html, width, height, left, top) {
+    const data = `<svg xmlns='http://www.w3.org/2000/svg' width="${width}" height="${height}">
         <style>
-        .code__el_temp .keyword {
-          color: #ff79c6;
-        }
-        .code__el_temp .def {
-          color: #50fa7b;
-        }
-        .code__el_temp .comment {
-          color: #6272a4;
-        }
-        .code__el_temp .string, .code__el_temp .string-2 {
-          color: #f1fa8c;
-        }
-        .code__el_temp .number {
-          color: #bd93f9;
-        }
-        .code__el_temp .variable {
-          color: #50fa7b;
-        }
-        .code__el_temp .variable-2 {
-          color: white;
-        }
-        .code__el_temp .operator {
-          color: #ff79c6;
-        }
-        .code__el_temp .atom {
-          color: #bd93f9;
-        }
-        .code__el_temp .meta {
-          color: #f8f8f2;
-        }
-        .code__el_temp .tag {
-          color: #ff79c6;
-        }
-        .code__el_temp .attribute, .code__el_temp .qualifier, .code__el_temp .builtin {
-          color: #50fa7b;
-        }
-        .code__el_temp .property {
-          color: #66d9ef;
-        }
-        .code__el_temp .variable-3, .code__el_temp .type {
-          color: #ffb86c;
-        }
-        .code__el_temp p {
-          line-height: 18px;
-          font-size: 14px;
-          font-family: Roboto;
-          color: white;
-          margin: 0;
-          word-wrap: break-word;
-          white-space: pre-wrap;
-          word-break: normal;
-        }
+          .codeEl__temp {
+            font-family: Roboto;
+            font-size: 14px;
+            padding-left: 51px;
+            padding-top: 25px;
+            box-sizing: border-box;
+            background-color: #282a36;
+            border-radius: 8px;
+            color: #fff
+          }
+          .codeEl__temp > div {
+            line-height: 18px;
+            min-height: 18px;
+            padding-right: 10px;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            word-break: normal;
+            position: relative;
+            font-weight: normal;
+          }
+          .codeEl__temp .keyword {
+            color: #ff79c6;
+          }
+          .codeEl__temp .def {
+            color: #50fa7b;
+          }
+          .codeEl__temp .comment {
+            color: #6272a4;
+          }
+          .codeEl__temp .string, .codeEl__temp .string-2 {
+            color: #f1fa8c;
+          }
+          .codeEl__temp .number {
+            color: #bd93f9;
+          }
+          .codeEl__temp .variable {
+            color: #50fa7b;
+          }
+          .codeEl__temp .variable-2 {
+            color: white;
+          }
+          .codeEl__temp .operator {
+            color: #ff79c6;
+          }
+          .codeEl__temp .atom {
+            color: #bd93f9;
+          }
+          .codeEl__temp .meta {
+            color: #f8f8f2;
+          }
+          .codeEl__temp .tag {
+            color: #ff79c6;
+          }
+          .codeEl__temp .attribute, .codeEl__temp .qualifier, .codeEl__temp .builtin {
+            color: #50fa7b;
+          }
+          .codeEl__temp .property {
+            color: #66d9ef;
+          }
+          .codeEl__temp .variable-3, .codeEl__temp .type {
+            color: #ffb86c;
+          }
+          .codeEl__temp > div > b {
+            position: absolute;
+            width: 43px;
+            height: 17px;
+            font-size: 14px;
+            color: #6d8a88;
+            left: -46px;
+            line-height: 17px;
+            text-align: center;
+            font-weight: normal;
+          }
         </style>
-        <foreignObject width="${curW}" height="${curH}">
+        <foreignObject width="${width}" height="${height}">
           ${html}
         </foreignObject>
       </svg>`;
     var url = `data:image/svg+xml;charset=utf-8,${data}`;
-    url = url.replace(/\n/g, '').replace(/\t/g, '').replace(/#/g, '%23');
+    url = url.replace(/\n/g, "").replace(/\t/g, "").replace(/#/g, "%23");
     const img = new Image();
     img.src = url;
     img.onload = () => {
@@ -147,19 +182,21 @@ class Code {
       clonedRect.set({
         top: 0,
         left: 0,
-      })
+      });
       const svgImg = new fabric.Image(img, {
-        width: curW,
-        height: curH,
-        top: 25 + 1,
-        left: 51 + 1
+        width,
+        height,
+        top: 1,
+        left: 1,
       });
       this.svgGroup = new fabric.Group([clonedRect, svgImg], {
         top,
         left,
-        type: 'code'
-      })
+        type: "code",
+      });
       canvas.add(this.svgGroup);
+      this.codeDom.style.display = "none";
+      this.codeBg.visible = false;
       canvas.renderAll();
       this.svgGroup.on("mousedown", () => {
         canvas.discardActiveObject();
@@ -167,7 +204,7 @@ class Code {
       this.svgGroup.on("mousemove", () => {
         canvas.discardActiveObject();
       });
-      this.svgGroup.on('mouseup', () => {
+      this.svgGroup.on("mouseup", () => {
         this.codeBg.visible = true;
         this.codeBg.set({
           top: this.svgGroup.top,
@@ -178,36 +215,13 @@ class Code {
         this.setCodeDomStyles();
         canvas.remove(this.svgGroup);
         this.svgGroup = null;
-      })
-      this.svgGroup.on('remove', () => {
+      });
+      this.svgGroup.on("remove", () => {
         this.codeDom.remove();
-        canvas.remove(this.codeBg)
+        canvas.remove(this.codeBg);
         this.codeBg = null;
-      })
-      this.setLineNumber();
-    }
-  }
-  setLineNumber() {
-    const lineCount = this.editor.lineCount();
-    const lineNumerDoms = qsAll(this.codeDom, '.CodeMirror-gutter-wrapper .CodeMirror-linenumber');
-    for (let i = 0; i < lineCount; i++) {
-      const curTop = lineNumerDoms[i].getBoundingClientRect()['top']
-      let countText = new fabric.Text(`${i + 1}`, {
-        top: curTop,
-        fill: "#6d8a88",
-        fontFamily: "Roboto",
-        fontSize: 14,
-        width: 43,
       });
-      countText.set({
-        left: this.svgGroup.left + (43 - countText.width) / 2 + 5 + 0.1,
-      });
-      this.svgGroup.addWithUpdate(countText);
-      canvas.renderAll()
-    }
-    this.codeDom.style.display = "none";
-    this.codeBg.visible = false;
-    canvas.renderAll()
+    };
   }
   setCodeEl() {
     let domHtml = `
@@ -260,24 +274,29 @@ class Code {
   initCodeMirror() {
     const textareaDom = qs(this.codeDom, "textarea");
     this.editor = CodeMirror.fromTextArea(textareaDom, {
-      mode: { name: 'javascript', version: 3, singleLineStringErrors: false },
+      mode: { name: "javascript", version: 3, singleLineStringErrors: false },
       lineNumbers: true,
       styleActiveLine: true,
       matchBrackets: true,
       scrollbarStyle: null,
       lineWrapping: true,
-      theme: 'dracula',
+      theme: "dracula",
     });
     this.editor.on(
       "change",
       function () {
-        var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
-        this.codeBg.set({
-          height: codeHeight > this.height ? codeHeight : this.height,
-        });
-        canvas.renderAll();
+        setTimeout((() => {
+          this.setHeightByDomHeight();
+        }).bind(this), 100)
       }.bind(this)
     );
     this.editor.refresh();
+  }
+  setHeightByDomHeight() {
+    var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
+    this.codeBg.set({
+      height: codeHeight > this.height ? codeHeight : this.height,
+    });
+    canvas.renderAll();
   }
 }
