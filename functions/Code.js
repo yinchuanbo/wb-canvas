@@ -20,29 +20,33 @@ class Code {
       ry: 8,
       type: "code",
       codeBg: this,
+      originX: "left",
+      originY: "top",
     });
     canvas.add(this.codeBg);
     canvas.centerObject(this.codeBg);
     canvas.renderAll();
     this.setCodeEl();
     this.codeBg.on("scaling", () => {
-      if (!this.backgroundTop) {
-        this.backgroundTop = this.codeBg.top;
+      if (!this.codeBgTop) {
+        this.codeBgTop = this.codeBg.top;
       }
       if (this?.timer) {
         clearTimeout(this.timer);
         this.timer = null;
       }
-      // var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
+      // const scrollInfo = this.editor.getScrollInfo();
+      // let domHeight = scrollInfo.height + 50;
+      // domHeight = domHeight > 112 ? domHeight : 112;
       this.codeBg.set({
         scaleY: 1,
-        top: this.backgroundTop,
-        // height: codeHeight
+        top: this.codeBgTop,
+        // height: domHeight
       });
       this.setCodeDomStyles();
       this.timer = setTimeout(
         (() => {
-          this.backgroundTop = null;
+          this.codeBgTop = null;
         }).bind(this),
         1000
       );
@@ -215,6 +219,7 @@ class Code {
         this.setCodeDomStyles();
         canvas.remove(this.svgGroup);
         this.svgGroup = null;
+        this.editor.focus();
       });
       this.svgGroup.on("remove", () => {
         this.codeDom.remove();
@@ -285,12 +290,17 @@ class Code {
     this.editor.on(
       "change",
       function () {
-        setTimeout((() => {
-          this.setHeightByDomHeight();
-        }).bind(this), 100)
+        setTimeout(
+          (() => {
+            this.setHeightByDomHeight();
+          }).bind(this),
+          100
+        );
       }.bind(this)
     );
     this.editor.refresh();
+    // 这里
+    this.setCloneCodeBg();
   }
   setHeightByDomHeight() {
     var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
