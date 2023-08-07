@@ -79,6 +79,9 @@ function deleteComponent(event) {
       if (activeObject?.newNetdisk) {
         activeObject.newNetdisk.netdiskNewBox = null;
       }
+      if (activeObject?.codeBg) {
+        activeObject.codeBg.codeBg = null;
+      }
       canvas.remove(activeObject);
       canvas.discardActiveObject();
       activeObject = null;
