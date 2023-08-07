@@ -71,7 +71,6 @@ function handleResize() {
 function deleteComponent(event) {
   if (event.key === "Delete") {
     let activeObject = canvas.getActiveObject();
-    console.log('activeObject', activeObject)
     if (activeObject) {
       if (activeObject?.fabricImg) {
         canvas.remove(activeObject.fabricImg);
@@ -81,6 +80,9 @@ function deleteComponent(event) {
       }
       if (activeObject?.codeBg) {
         activeObject.codeBg.codeBg = null;
+      }
+      if (activeObject?.pdfBg) {
+        activeObject.pdfBg.pdfBg = null;
       }
       canvas.remove(activeObject);
       canvas.discardActiveObject();

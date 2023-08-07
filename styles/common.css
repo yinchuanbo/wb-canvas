@@ -995,6 +995,8 @@ button {
   background-color: #fff;
   box-sizing: border-box;
   text-align: center;
+  display: flex;
+  align-items: center;
 }
 
 .pdf__main .main__sidebar {

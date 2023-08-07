@@ -1,16 +1,14 @@
-$id('officeFile').onchange = (e) => {
-  // 获取上传文件的类型
+$id("officeFile").onchange = (e) => {
   var file = e.target.files[0];
   var type = file.type;
   var name = file.name;
-  if (type.includes('/pdf')) {
+  if (type.includes("/pdf")) {
     new Pdf({
       file,
-      name
+      name,
     });
   }
-}
-
+};
 class Pdf {
   constructor(data) {
     this.file = data.file;
@@ -21,7 +19,7 @@ class Pdf {
     this.init();
   }
   init() {
-    this.renderPDF()
+    this.renderPDF();
   }
   renderPDF() {
     this.pdfBg = new fabric.Rect({
@@ -38,17 +36,18 @@ class Pdf {
       ry: 8,
       stroke: "#d1d1d1",
       strokeWidth: 1,
-      type: 'pdf'
+      type: "pdf",
+      pdfBg: this
     });
     canvas.add(this.pdfBg);
-    canvas.centerObject(this.pdfBg)
-    canvas.renderAll()
-    this.pdfBg.on('scaling', () => {
-      this.setPdfDomStyle()
-    })
-    this.pdfBg.on('removed', () => {
+    canvas.centerObject(this.pdfBg);
+    canvas.renderAll();
+    this.pdfBg.on("scaling", () => {
+      this.setPdfDomStyle();
+    });
+    this.pdfBg.on("removed", () => {
       this.pdfDom.remove();
-    })
+    });
     canvas.on("selection:updated", () => {
       const activeObject = canvas.getActiveObject();
       const isPdfBg = activeObject === this?.pdfBg;
@@ -60,8 +59,8 @@ class Pdf {
       if (!this?.pdfBg?.visible || !this?.pdfBg) return;
       this.setDomToCanvas();
     });
-    this.setPdfDom()
-    this.parseAndUploadPDF(this.file)
+    this.setPdfDom();
+    this.parseAndUploadPDF(this.file);
   }
   setPdfDom() {
     let html = `
@@ -91,14 +90,11 @@ class Pdf {
     cloneDom.style.top = 0;
     cloneDom.style.left = 0;
     let outerHTML = cloneDom.outerHTML;
-    outerHTML = outerHTML.replace(
-      /<img([^>]+)>/g,
-      "<img$1/>"
-    );
-    const sidebar = qs(this.pdfDom, '.main__sidebar');
-    const scrollPosition = parseFloat(sidebar.scrollTop) * scaleY;
-    const scrollHeight = sidebar.scrollHeight * scaleY;
-    const offsetHeight = sidebar.offsetHeight * scaleY;
+    outerHTML = outerHTML.replace(/<img([^>]+)>/g, "<img$1/>");
+    const sidebar = qs(this.pdfDom, ".main__sidebar");
+    const scrollPosition = parseFloat(sidebar.scrollTop);
+    const scrollHeight = sidebar.scrollHeight;
+    const offsetHeight = sidebar.offsetHeight;
     const isHasScrollBar = scrollHeight > offsetHeight;
     const data = `<svg xmlns='http://www.w3.org/2000/svg' width='${curWidth}' height='${curHeight}'>
     <style>
@@ -138,6 +134,8 @@ class Pdf {
         background-color: #fff;
         box-sizing: border-box;
         text-align: center;
+        display: flex;
+        align-items: center;
       }
       .pdf__main .main__sidebar {
         flex: 1;
@@ -181,7 +179,7 @@ class Pdf {
     </foreignObject>
   </svg>`;
     var url = `data:image/svg+xml;charset=utf-8,${data}`;
-    url = url.replace(/\n/g, '').replace(/\t/g, '').replace(/#/g, '%23');
+    url = url.replace(/\n/g, "").replace(/\t/g, "").replace(/#/g, "%23");
     const img = new Image();
     img.src = url;
     img.onload = () => {
@@ -192,13 +190,17 @@ class Pdf {
       });
       const svgImg = new fabric.Image(img);
       const scrollbarRect = new fabric.Rect({
-        width: 6,
-        height: (offsetHeight / scrollHeight * offsetHeight),
-        left: (10 + 370 + 10 + 77 + 2 - 0.2),
-        top: (offsetHeight - (offsetHeight / scrollHeight * offsetHeight)) * (scrollPosition / (scrollHeight - offsetHeight)) + (37 + 17 + 18),
+        width: 6 * scaleX,
+        height: (offsetHeight / scrollHeight) * offsetHeight * scaleY,
+        left: (10 + 370 + 10 + 77 + 2 - 0.2) * scaleX,
+        top:
+          (offsetHeight * scaleY -
+            (offsetHeight / scrollHeight) * offsetHeight * scaleY) *
+            (scrollPosition / (scrollHeight - offsetHeight)) +
+          (37 + 17 + 18) * scaleY,
         fill: "#e0e2e2",
         rx: 4,
-        ry: 4
+        ry: 4,
       });
       let groupArr = [clonedRect, svgImg];
       if (isHasScrollBar) {
@@ -207,19 +209,19 @@ class Pdf {
       this.svgGroup = new fabric.Group(groupArr, {
         top,
         left,
-        type: 'pdf'
-      })
+        type: "pdf",
+      });
       this.pdfDom.style.display = "none";
       this.pdfBg.visible = false;
       canvas.add(this.svgGroup);
-      canvas.renderAll()
+      canvas.renderAll();
       this.svgGroup.on("mousedown", () => {
         canvas.discardActiveObject();
       });
       this.svgGroup.on("mousemove", () => {
         canvas.discardActiveObject();
       });
-      this.svgGroup.on('mouseup', () => {
+      this.svgGroup.on("mouseup", () => {
         this.pdfBg.visible = true;
         this.pdfBg.set({
           top: this.svgGroup.top,
@@ -230,33 +232,33 @@ class Pdf {
         this.setPdfDomStyle();
         canvas.remove(this.svgGroup);
         this.svgGroup = null;
-      })
+      });
     };
   }
   changePdfPage() {
-    qs(this.pdfDom, '.main__sidebar').onclick = (e) => {
+    qs(this.pdfDom, ".main__sidebar").onclick = (e) => {
       const target = e.target;
-      if (target.tagName === 'IMG') {
+      if (target.tagName === "IMG") {
         const index = getIndex(target.parentNode);
-        const mainSidebarItems = qsAll(this.pdfDom, '.main__sidebar_item');
-        const mainContentImgs = qsAll(this.pdfDom, '.main__content img');
+        const mainSidebarItems = qsAll(this.pdfDom, ".main__sidebar_item");
+        const mainContentImgs = qsAll(this.pdfDom, ".main__content img");
         mainSidebarItems.forEach((item) => {
-          item.classList.remove('active')
-        })
-        target.parentNode.classList.add('active')
+          item.classList.remove("active");
+        });
+        target.parentNode.classList.add("active");
         mainContentImgs.forEach((item) => {
-          item.style.display = 'none'
-        })
-        mainContentImgs[index].style.display = 'block'
+          item.style.display = "none";
+        });
+        mainContentImgs[index].style.display = "block";
       }
-    }
+    };
   }
   setPdfDomStyle() {
     let { width, height, scaleX, scaleY, top, left } = this.pdfBg;
     if (this?.pdfDom) {
       this.pdfDom.style.width = `${width}px`;
       this.pdfDom.style.height = `${height}px`;
-      this.pdfDom.style.transform = `scale(${scaleX, scaleY})`;
+      this.pdfDom.style.transform = `scale(${(scaleX, scaleY)})`;
       this.pdfDom.style.transformOrigin = `left top`;
       this.pdfDom.style.left = `${left}px`;
       this.pdfDom.style.top = `${top}px`;
@@ -270,7 +272,6 @@ class Pdf {
       canvas.setActiveObject(this.pdfBg);
       canvas.renderAll();
       const handlePointerMove = (event) => {
-        // this.setDomToCanvas();
         const deltaX = event.clientX - initialX;
         const deltaY = event.clientY - initialY;
         this.pdfBg.set({
@@ -298,20 +299,30 @@ class Pdf {
           const curI = i;
           pdf.getPage(i).then((page) => {
             var viewport = page.getViewport({ scale: 1 });
-            var canvasEl = document.createElement('canvas');
-            var context = canvasEl.getContext('2d');
+            var canvasEl = document.createElement("canvas");
+            var context = canvasEl.getContext("2d");
             canvasEl.height = viewport.height;
             canvasEl.width = viewport.width;
-            page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
-              var imgData = canvasEl.toDataURL('image/png');
-              const curImgHtml = `<img src="${imgData}" style="display: ${curI === 1 ? 'block' : 'none'} " data-index="${curI}"/>`;
-              qs(this.pdfDom, '.main__content').insertAdjacentHTML('beforeend', curImgHtml);
-              qs(this.pdfDom, '.main__sidebar').insertAdjacentHTML('beforeend', `
-                <div class="main__sidebar_item ${curI === 1 ? 'active' : ''}">
+            page
+              .render({ canvasContext: context, viewport: viewport })
+              .promise.then(() => {
+                var imgData = canvasEl.toDataURL("image/png");
+                const curImgHtml = `<img src="${imgData}" style="display: ${
+                  curI === 1 ? "block" : "none"
+                } " data-index="${curI}"/>`;
+                qs(this.pdfDom, ".main__content").insertAdjacentHTML(
+                  "beforeend",
+                  curImgHtml
+                );
+                qs(this.pdfDom, ".main__sidebar").insertAdjacentHTML(
+                  "beforeend",
+                  `
+                <div class="main__sidebar_item ${curI === 1 ? "active" : ""}">
                   <img src="${imgData}" data-index="${curI}"/>
                 </div>
-              `);
-            });
+              `
+                );
+              });
           });
         }
       });
