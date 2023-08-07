@@ -124,7 +124,7 @@ class Code {
           color: #ffb86c;
         }
         .code__el_temp p {
-          height: 18px;
+          line-height: 18px;
           font-size: 14px;
           font-family: Roboto;
           color: white;
@@ -271,13 +271,11 @@ class Code {
     this.editor.on(
       "change",
       function () {
-        setTimeout((() => {
-          var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
-          this.codeBg.set({
-            height: codeHeight > this.height ? codeHeight : this.height,
-          });
-          canvas.renderAll();
-        }).bind(this), 100)
+        var codeHeight = qs(this.codeDom, ".CodeMirror").offsetHeight;
+        this.codeBg.set({
+          height: codeHeight > this.height ? codeHeight : this.height,
+        });
+        canvas.renderAll();
       }.bind(this)
     );
     this.editor.refresh();

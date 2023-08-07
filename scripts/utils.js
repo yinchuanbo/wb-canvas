@@ -14,7 +14,7 @@ function showToolBar() {
   let boundingRect = selectedObject.getBoundingRect();
   const type = selectedObject?.type || '';
   let dis = null;
-  if (['youtube', 'netdiskGroup', 'newNetdisk', 'code'].includes(type)) {
+  if (['youtube', 'netdiskGroup', 'newNetdisk', 'code', 'pdf'].includes(type)) {
     setControlsVisibility(selectedObject);
     return;
   }
@@ -481,4 +481,14 @@ function getNodeContent(node) {
     }
   }
   return content;
+}
+
+function getIndex(target) {
+  const parent = target.parentNode;
+  const siblings = parent.children;
+  for (let i = 0; i < siblings.length; i++) {
+    if (siblings[i] === target) {
+      return i;
+    }
+  }
 }

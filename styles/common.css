@@ -659,7 +659,7 @@ button {
   width: 6px;
 }
 .netdisk__el::-webkit-scrollbar-thumb {
-  background: #e0e2e2 0% 0% no-repeat padding-box;
+  background: #e0e2e2;
   border-radius: 4px;
 }
 
@@ -822,6 +822,7 @@ button {
   border-radius: 5px;
   font-size: 14px;
   text-indent: 5px;
+  background-color: #fff;
 }
 
 #link.active .link__input input:focus {
@@ -952,4 +953,86 @@ button {
 .CodeMirror pre.CodeMirror-line,
 .CodeMirror pre.CodeMirror-line-like {
   padding: 0 !important;
+}
+
+.pdf__el {
+  position: absolute;
+  padding: 18px 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf__el .pdf__title {
+  width: 100%;
+  height: 37px;
+  margin-bottom: 17px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: rgb(70, 70, 70);
+}
+
+.pdf__el .pdf__title img {
+  margin-right: 5px;
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.pdf__main {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  max-height: 525px;
+}
+
+.pdf__main .main__content {
+  width: 370px;
+  height: 100%;
+  margin-right: 10px;
+  border: 2px solid #d1d1d1;
+  background-color: #fff;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.pdf__main .main__sidebar {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.pdf__main .main__sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.pdf__main .main__sidebar::-webkit-scrollbar-thumb {
+  background: #e0e2e2;
+  border-radius: 4px;
+}
+
+.pdf__main .main__sidebar .main__sidebar_item {
+  height: 105px;
+  border: 2px solid #e0e2e2;
+  box-sizing: border-box;
+  background-color: #fff;
+  text-align: center;
+}
+
+.pdf__main .main__sidebar .main__sidebar_item.active {
+  border-color: #2b7afc;
+}
+
+.pdf__main .main__sidebar .main__sidebar_item + .main__sidebar_item {
+  margin-top: 10px;
+}
+
+.pdf__main .main__content img,
+.main__sidebar_item img {
+  max-width: 100%;
+  max-height: 100%;
+  position: relative;
+  user-select: none;
+  -webkit-user-drag: none;
 }
