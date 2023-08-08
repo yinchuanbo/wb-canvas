@@ -997,6 +997,7 @@ button {
   text-align: center;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .pdf__main .main__sidebar {
@@ -1004,6 +1005,7 @@ button {
   overflow-x: hidden;
   overflow-y: auto;
   padding-right: 2px;
+  flex-shrink: 0;
 }
 
 .pdf__main .main__sidebar::-webkit-scrollbar {

@@ -47,11 +47,15 @@ class Pdf {
     });
     this.pdfBg.on("removed", () => {
       this.pdfDom.remove();
+      if (this?.pdfBg) {
+        canvas.remove(this.pdfBg)
+        this.pdfBg = null
+      }
     });
     canvas.on("selection:updated", () => {
       const activeObject = canvas.getActiveObject();
       const isPdfBg = activeObject === this?.pdfBg;
-      if (!isPdfBg) {
+      if (!isPdfBg && this?.pdfBg) {
         this.setDomToCanvas();
       }
     });
@@ -61,6 +65,9 @@ class Pdf {
     });
     this.setPdfDom();
     this.parseAndUploadPDF(this.file);
+    setTimeout((() => {
+      this.setDomToCanvas();
+    }).bind(this), 1000)
   }
   setPdfDom() {
     let html = `
@@ -136,12 +143,14 @@ class Pdf {
         text-align: center;
         display: flex;
         align-items: center;
+        flex-shrink: 0;
       }
       .pdf__main .main__sidebar {
         flex: 1;
         overflow-x: hidden;
         overflow-y: auto;
         padding-right: 2px;
+        flex-shrink: 0;
       }
       .pdf__main .main__sidebar::-webkit-scrollbar {
         width: 6px;
@@ -194,11 +203,11 @@ class Pdf {
       const scrollbarRect = new fabric.Rect({
         width: 6 * scaleX,
         height: (offsetHeight / scrollHeight) * offsetHeight * scaleY,
-        left: (10 + 370 + 10 + 77 + 2 - 0.2) * scaleX,
+        left: (10 + 370 + 10 + 77 + 2) * scaleX,
         top:
           (offsetHeight * scaleY -
             (offsetHeight / scrollHeight) * offsetHeight * scaleY) *
-            (scrollPosition / (scrollHeight - offsetHeight)) +
+          (scrollPosition / (scrollHeight - offsetHeight)) +
           (37 + 17 + 18) * scaleY,
         fill: "#e0e2e2",
         rx: 4,
@@ -305,9 +314,8 @@ class Pdf {
               .render({ canvasContext: context, viewport: viewport })
               .promise.then(() => {
                 var imgData = canvasEl.toDataURL("image/png");
-                const curImgHtml = `<img src="${imgData}" style="display: ${
-                  curI === 1 ? "block" : "none"
-                } " data-index="${curI}"/>`;
+                const curImgHtml = `<img src="${imgData}" style="display: ${curI === 1 ? "block" : "none"
+                  } " data-index="${curI}"/>`;
 
                 const mainContent = qs(this.pdfDom, ".main__content");
                 if (!mainContent?.children?.length) {
