@@ -7,7 +7,7 @@ $id("officeFile").onchange = (e) => {
     //   file,
     //   name,
     // });
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 100; i++) {
       new Pdf({
         file,
         name,
@@ -46,7 +46,7 @@ class Pdf {
       pdfBg: this,
     });
     canvas.add(this.pdfBg);
-    canvas.centerObject(this.pdfBg);
+    this.pdfBg.viewportCenter()
     canvas.renderAll();
     this.pdfBg.on("scaling", () => {
       this.setPdfDomStyle();
@@ -306,6 +306,7 @@ class Pdf {
     var reader = new FileReader();
     reader.onload = (e) => {
       var pdfData = new Uint8Array(e.target.result);
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '../scripts/libs/pdf/pdf.worker.js';
       pdfjsLib.getDocument(pdfData).promise.then((pdf) => {
         var numPages = pdf.numPages;
         for (let i = 1; i <= numPages; i++) {
@@ -322,13 +323,12 @@ class Pdf {
                 var imgData = canvasEl.toDataURL("image/png");
                 const curImgHtml = `<img src="${imgData}" style="display: ${curI === 1 ? "block" : "none"
                   } " data-index="${curI}"/>`;
-
                 const mainContent = qs(this.pdfDom, ".main__content");
+                const mainSidebar = qs(this.pdfDom, ".main__sidebar");
                 if (!mainContent?.children?.length) {
                   mainContent.insertAdjacentHTML("beforeend", curImgHtml);
                 }
-
-                qs(this.pdfDom, ".main__sidebar").insertAdjacentHTML(
+                mainSidebar.insertAdjacentHTML(
                   "beforeend",
                   `
                 <div class="main__sidebar_item ${curI === 1 ? "active" : ""}">
@@ -336,6 +336,10 @@ class Pdf {
                 </div>
               `
                 );
+                if (mainSidebar?.children?.length === numPages) {
+                  console.log('读取完成');
+                  pdf.destroy()
+                }
               });
           });
         }

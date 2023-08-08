@@ -1,8 +1,10 @@
 $id("linkAdd").onclick = () => {
 	let val = (linkContent.value || "").trim();
 	if (!val) return;
+	$id("link").classList.remove("active");
+	linkContent.value = '';
 	if (isYoutubeUrl(val)) {
-		for (let i = 0; i < 500; i++) {
+		for (let i = 0; i < 100; i++) {
 			new YoutubeLink({
 				url: val,
 				width: 742,
@@ -38,8 +40,6 @@ $id("linkAdd").onclick = () => {
 	} else {
 		alert("Link Invalid");
 	}
-	$id("link").classList.remove("active");
-	linkContent.value = '';
 };
 class YoutubeLink {
 	constructor(data = {}) {
@@ -128,53 +128,48 @@ class YoutubeLink {
 				[background, youtubeLogo, youtubeTitle, poster, youtubePlayBtn],
 				{
 					type: "youtube",
+					subTargetCheck: true
 				}
 			);
 			canvas.add(this.group);
-			canvas.centerObject(this.group);
+			this.group.viewportCenter()
 			this.group.on("moving", () => {
 				this.changeYoutubeDom();
 			});
-			this.group.on("mouseup", (e) => {
-				e.e.preventDefault();
-				const curX = e.pointer.x;
-				const curY = e.pointer.y;
-				const childs = this.group._objects;
-				const viewBtn = childs.filter(item => item?.type === "youtubePlayBtn");
-				const curRect = viewBtn[0].getBoundingRect();
-				const { x, y } = this.group.getCenterPoint();
-				const minX = x + curRect.left;
-				const maxX = x + curRect.left + curRect.width;
-				const minY = y + curRect.top;
-				const maxY = y + curRect.top + curRect.height;
-				console.log('minX', minX)
-				if (
-					curX > minX &&
-					curX < maxX &&
-					curY > minY &&
-					curY < maxY
-				) {
-					this.loadYoutube();
-				}
-			});
-			canvas.on('mouse:move', (e) => {
-				const { x, y } = e.pointer;
-				const { minX, maxX, minY, maxY } = this.getViewBtnArea();
-				const childs = this.group._objects;
-				const viewBtn = childs.filter(item => item?.type === "youtubePlayBtn");
-				if (x > minX && x < maxX && y > minY && y < maxY) {
-					viewBtn[0].set({
-						opacity: 0.5
-					})
-				} else {
-					viewBtn[0].set({
-						opacity: 1
-					})
-				}
-				canvas.renderAll()
-			})
+			this.setPlayBtnClick();
 			canvas.renderAll();
 		});
+	}
+	setPlayBtnClick() {
+		const childs = this.group._objects;
+		const viewBtn = childs.filter(item => item?.type === "youtubePlayBtn");
+		if (!viewBtn?.length) return;
+		const item = viewBtn[0];
+		let isClick = false;
+		item.on('mousedown', () => {
+			isClick = true;
+		})
+		item.on('mousemove', () => {
+			isClick = false;
+		})
+		item.on('mouseup', () => {
+			if (isClick) {
+				this.loadYoutube();
+			}
+		})
+		item.on('mouseover', () => {
+			item.set({
+				opacity: 0.7,
+				hoverCursor: 'pointer'
+			})
+			canvas.renderAll()
+		})
+		item.on('mouseout', () => {
+			item.set({
+				opacity: 1
+			})
+			canvas.renderAll()
+		})
 	}
 	getViewBtnArea() {
 		const childs = this.group._objects;
@@ -344,7 +339,7 @@ class SpotifyLink {
 				type: "spotify",
 			});
 			canvas.add(this.group);
-			canvas.centerObject(this.group);
+			this.group.viewportCenter()
 			this.group.on("moving", () => {
 				this.changeSpotifyDom();
 			});
@@ -556,7 +551,7 @@ class CodeLink {
 			type: "coda",
 		});
 		canvas.add(this.group);
-		canvas.centerObject(this.group);
+		this.group.viewportCenter()
 		// this.setCodaDom();
 		this.group.on("moving", () => {
 			this.changeCodaDom();

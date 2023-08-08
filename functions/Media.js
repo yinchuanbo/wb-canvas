@@ -4,14 +4,20 @@ $id("upload").addEventListener("change", (e) => {
   reader.onload = (event) => {
     e.target.value = "";
     if (file.type.startsWith("video/")) {
-      new VideoMedia({ file });
+      for (let i = 0; i < 200; i++) {
+        new VideoMedia({ file });
+      }
     } else if (file.type.startsWith("audio/")) {
-      new AudioMedia(file);
+      for (let i = 0; i < 200; i++) {
+        new AudioMedia(file);
+      }
     } else if (file.type.startsWith("image/")) {
       const imgObj = new Image();
       imgObj.src = event.target.result;
       imgObj.onload = () => {
-        new ImgMedia(imgObj);
+        for (let i = 0; i < 1000; i++) {
+          new ImgMedia(imgObj);
+        }
       };
     }
   };
@@ -45,7 +51,7 @@ class ImgMedia {
       scaleY: size.height / originImgH,
     });
     canvas.add(this.fabricImg);
-    canvas.centerObject(this.fabricImg);
+    this.fabricImg.viewportCenter()
     this.originalImage = {
       width: this.fabricImg.width,
       height: this.fabricImg.height,
@@ -842,34 +848,49 @@ class VideoMedia {
         top: (this.videoH + 17 * 2 - 80) / 2,
         type: 'videoPlayBtn'
       })
-      this.videoGroup = new fabric.Group([videoBg, img, playButtonImg]);
+      this.videoGroup = new fabric.Group([videoBg, img, playButtonImg], {
+        subTargetCheck: true
+      });
       canvas.add(this.videoGroup);
-      canvas.centerObject(this.videoGroup);
+      this.videoGroup.viewportCenter()
       canvas.renderAll();
       this.videoGroup.on('scaling', () => {
         showToolBar();
       })
-      this.videoGroup.on("mouseup", (e) => {
-        e.e.preventDefault();
-        const curX = e.pointer.x;
-        const curY = e.pointer.y;
-        const childs = this.videoGroup._objects;
-        const viewBtn = childs.filter(item => item?.type === "videoPlayBtn");
-        const curRect = viewBtn[0].getBoundingRect();
-        const { x, y } = this.videoGroup.getCenterPoint();
-        const minX = x + curRect.left;
-        const maxX = x + curRect.left + curRect.width;
-        const minY = y + curRect.top;
-        const maxY = y + curRect.top + curRect.height;
-        if (
-          curX > minX &&
-          curX < maxX &&
-          curY > minY &&
-          curY < maxY
-        ) {
-          alert('暂时去掉了视频播放')
-        }
-      });
+      this.setPlayBtnClick();
+    })
+  }
+  setPlayBtnClick() {
+    const childs = this.videoGroup._objects;
+    const viewBtn = childs.filter(item => item?.type === "videoPlayBtn");
+    if (!viewBtn?.length) return;
+    const item = viewBtn[0];
+    let isClick = false;
+    item.on('mousedown', () => {
+      isClick = true;
+    })
+    item.on('mousemove', () => {
+      isClick = false;
+    })
+    item.on('mouseup', () => {
+      if (isClick) {
+        alert('暂时去掉视频播放')
+        var aCoords = this.videoGroup.aCoords;
+        console.log('aCoords', aCoords)
+      }
+    })
+    item.on('mouseover', () => {
+      item.set({
+        opacity: 0.7,
+        hoverCursor: 'pointer'
+      })
+      canvas.renderAll()
+    })
+    item.on('mouseout', () => {
+      item.set({
+        opacity: 1
+      })
+      canvas.renderAll()
     })
   }
 }
@@ -968,10 +989,12 @@ class AudioMedia {
       });
       this.audioGroup = new fabric.Group([audioBg, bgTop, musicLogo, musicPlayBtn, fileName, curTime, durTime, processBar, circleBall], {
         type: 'audio',
-        curObj: _this
+        curObj: _this,
+        subTargetCheck: true
       });
       canvas.add(this.audioGroup);
-      canvas.centerObject(this.audioGroup);
+      this.audioGroup.viewportCenter()
+      this.setPlayBtnClick()
       this.audioGroup.on('mouseover', () => {
         const musicPlayBtnCom = this.audioGroup._objects.filter(item => item?.type === 'musicPlayBtn');
         if (musicPlayBtnCom?.length) {
@@ -986,28 +1009,38 @@ class AudioMedia {
           canvas.renderAll()
         }
       })
-      this.audioGroup.on("mouseup", (e) => {
-        e.e.preventDefault();
-        const curX = e.pointer.x;
-        const curY = e.pointer.y;
-        const childs = this.audioGroup._objects;
-        const viewBtn = childs.filter(item => item?.type === "musicPlayBtn");
-        const curRect = viewBtn[0].getBoundingRect();
-        const { x, y } = this.audioGroup.getCenterPoint();
-        const minX = x + curRect.left;
-        const maxX = x + curRect.left + curRect.width;
-        const minY = y + curRect.top;
-        const maxY = y + curRect.top + curRect.height;
-        if (
-          curX > minX &&
-          curX < maxX &&
-          curY > minY &&
-          curY < maxY
-        ) {
-          alert('暂时去掉了音频播放')
-        }
-      });
       canvas.renderAll();
     };
+  }
+  setPlayBtnClick() {
+    const childs = this.audioGroup._objects;
+    const viewBtn = childs.filter(item => item?.type === "musicPlayBtn");
+    if (!viewBtn?.length) return;
+    const item = viewBtn[0];
+    let isClick = false;
+    item.on('mousedown', () => {
+      isClick = true;
+    })
+    item.on('mousemove', () => {
+      isClick = false;
+    })
+    item.on('mouseup', () => {
+      if (isClick) {
+        alert('暂时去掉了音频播放')
+      }
+    })
+    item.on('mouseover', () => {
+      item.set({
+        opacity: 0.7,
+        hoverCursor: 'pointer'
+      })
+      canvas.renderAll()
+    })
+    item.on('mouseout', () => {
+      item.set({
+        opacity: 1
+      })
+      canvas.renderAll()
+    })
   }
 }

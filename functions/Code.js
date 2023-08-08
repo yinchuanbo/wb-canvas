@@ -1,5 +1,8 @@
 $id("code").onclick = () => {
   new Code();
+  for (let i = 0; i < 200; i++) {
+    new Code();
+  }
 };
 class Code {
   constructor() {
@@ -24,7 +27,7 @@ class Code {
       originY: "top",
     });
     canvas.add(this.codeBg);
-    canvas.centerObject(this.codeBg);
+    this.codeBg.viewportCenter()
     canvas.renderAll();
     this.setCodeEl();
     this.codeBg.on("scaling", () => {

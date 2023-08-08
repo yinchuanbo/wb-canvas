@@ -1,5 +1,7 @@
 $id("netdisk").onclick = () => {
-  new Netdisk();
+  for (let i = 0; i < 100; i++) {
+    new Netdisk();
+  }
 };
 class Netdisk {
   constructor() {
@@ -102,7 +104,7 @@ class Netdisk {
       }
     );
     canvas.add(this.addGroup);
-    canvas.centerObject(this.addGroup);
+    this.addGroup.viewportCenter()
     this.addGroup.on("mousedown", (e) => {
       const curX = e.pointer.x - this.addGroup.left;
       const curY = e.pointer.y - this.addGroup.top;
