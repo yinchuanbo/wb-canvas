@@ -2,11 +2,13 @@ $id("linkAdd").onclick = () => {
 	let val = (linkContent.value || "").trim();
 	if (!val) return;
 	if (isYoutubeUrl(val)) {
-		new YoutubeLink({
-			url: val,
-			width: 742,
-			height: 420,
-		});
+		for (let i = 0; i < 500; i++) {
+			new YoutubeLink({
+				url: val,
+				width: 742,
+				height: 420,
+			});
+		}
 	} else if (isSpotifyUrl(val)) {
 		let src = val.split("?")[0];
 		src = src.split("/");

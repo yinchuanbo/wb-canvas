@@ -59,6 +59,19 @@ function showToolBar() {
   selectedObject.setControlVisible("mt", false);
   selectedObject.setControlVisible("mb", false);
   selectedObject.setControlVisible("mtr", false);
+  if (selectedObject.type === "audio") {
+    setControlsVisibility(selectedObject, {
+      tl: false,
+      tr: false,
+      br: false,
+      bl: false,
+      ml: false,
+      mt: false,
+      mr: false,
+      mb: false,
+      mtr: false,
+    });
+  }
   canvas.renderAll();
 }
 // 监听视口尺寸改变
@@ -143,21 +156,21 @@ async function exportImageFun() {
   const tempDom = [];
   const tempVideoDom = Array.from(handleVideos);
   // const tempNetdiskDom = Array.from(handleNetdiskEl);
-  const audioArr = objects.filter((item) => item?.type === "audio");
-  if (audioArr?.length) {
-    audioArr.forEach((item) => {
-      const temp = createTempAudio({
-        curTime: item.curObj?.currentTime || "00:00",
-        duration: item.duration,
-        left: item.left,
-        top: item.top,
-        isPlay: item.curObj.isPlay,
-        name: item.curObj.audioFile.name,
-        playRatio: item.curObj?.playRatio || 0,
-      });
-      tempDom.push(temp);
-    });
-  }
+  // const audioArr = objects.filter((item) => item?.type === "audio");
+  // if (audioArr?.length) {
+  //   audioArr.forEach((item) => {
+  //     const temp = createTempAudio({
+  //       curTime: item.curObj?.currentTime || "00:00",
+  //       duration: item.duration,
+  //       left: item.left,
+  //       top: item.top,
+  //       isPlay: item.curObj.isPlay,
+  //       name: item.curObj.audioFile.name,
+  //       playRatio: item.curObj?.playRatio || 0,
+  //     });
+  //     tempDom.push(temp);
+  //   });
+  // }
   // const newArr = tempDom.concat(tempVideoDom, tempNetdiskDom)
   const newArr = tempDom.concat(tempVideoDom);
   for (let i = 0; i < newArr.length; i++) {

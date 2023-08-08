@@ -221,7 +221,7 @@ button {
 }
 
 .handle__video {
-  position: relative;
+  position: absolute;
 }
 
 .handle__video .play__button {

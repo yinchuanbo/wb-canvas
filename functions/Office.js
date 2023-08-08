@@ -3,10 +3,16 @@ $id("officeFile").onchange = (e) => {
   var type = file.type;
   var name = file.name;
   if (type.includes("/pdf")) {
-    new Pdf({
-      file,
-      name,
-    });
+    // new Pdf({
+    //   file,
+    //   name,
+    // });
+    for (let i = 0; i < 5; i++) {
+      new Pdf({
+        file,
+        name,
+      });
+    }
   }
 };
 class Pdf {

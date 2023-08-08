@@ -184,6 +184,7 @@ class Netdisk {
       if (this?.curLock) return;
       this.curLock = true
       let cloneDom = this.editDom.cloneNode(true);
+      this.cloneDom = cloneDom;
       cloneDom.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
       let outerHTML = cloneDom.outerHTML;
       outerHTML = outerHTML.replace(
@@ -333,11 +334,11 @@ class Netdisk {
           });
         });
         this.svgGroup.on("moving", () => {
-          this.changeEditDom(this.svgGroup);
-          this.netdiskNewBox.set({
-            left: this.svgGroup.left,
-            top: this.svgGroup.top,
-          });
+          // this.changeEditDom(this.svgGroup);
+          // this.netdiskNewBox.set({
+          //   left: this.svgGroup.left,
+          //   top: this.svgGroup.top,
+          // });
         });
         this.svgGroup.on("mousedown", () => {
           canvas.discardActiveObject();
@@ -347,6 +348,11 @@ class Netdisk {
         });
         this.svgGroup.on("mouseup", () => {
           if (this?.svgGroup) {
+            this.changeEditDom(this.svgGroup);
+            this.netdiskNewBox.set({
+              left: this.svgGroup.left,
+              top: this.svgGroup.top,
+            });
             canvas.remove(this.svgGroup);
             this.svgGroup = null;
           }
