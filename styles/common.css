@@ -39,7 +39,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3px 6px;
+  padding: 3px 10px;
   font-size: 13px;
   background-color: #fff;
 }

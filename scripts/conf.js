@@ -11,7 +11,7 @@ fabric.Object.prototype.set({
 });
 
 // canvas.selection = true;
-// canvas.allowTouchScrolling = true;
+canvas.allowTouchScrolling = true;
 
 // 设置初始比例
-// curScale.innerHTML = `${INIT_SCALE}`;
+curScale.innerHTML = `${INIT_SCALE}`;
